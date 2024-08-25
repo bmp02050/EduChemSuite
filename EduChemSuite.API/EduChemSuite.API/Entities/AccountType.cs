@@ -1,8 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿namespace EduChemSuite.API.Entities;
 
-namespace EduChemSuite.API.Entities;
-
-public class AccountType: BaseEntity
+public enum AccountType
 {
-    public required String Description { get; set; }
-}
+    Admin,
+    Student,
+    Staff,
+    AdminStaff
+} 

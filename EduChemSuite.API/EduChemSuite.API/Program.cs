@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Text;
 using EduChemSuite.API;
 using EduChemSuite.API.Helpers;
@@ -5,6 +6,8 @@ using EduChemSuite.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
+using Serilog;
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
@@ -14,9 +17,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services
+    .Configure<Jwt>(builder.Configuration.GetSection("Jwt"))
+    .AddScoped<Jwt>()
     .AddTransient<IEmailService, EmailService>()
     .AddTransient(typeof(IBaseService<>), typeof(BaseService<>))
-    .AddTransient<IAccountTypeService, AccountTypeService>()
     .AddTransient<IAnswerService, AnswerService>()
     .AddTransient<IDistrictService, DistrictService>()
     .AddTransient<IExamQuestionService, ExamQuestionService>()
@@ -29,11 +33,10 @@ builder.Services
     .AddTransient<IQuestionTypeService, QuestionTypeService>()
     .AddTransient<ISchoolService, SchoolService>()
     .AddTransient<ITagService, TagService>()
-    .AddTransient<ITokenRepositoryService, TokenService>()
-    .AddTransient<IUserDistrictService, UserDistrictService>()
+    .AddTransient<ITokenService, TokenService>()
     .AddTransient<IUserSchoolService, UserSchoolService>()
     .AddTransient<IUserService, UserService>();
-
+builder.Services.AddAuthorizationBuilder();
 builder.Services.AddDbContext<Context>(options =>
     {
         options.UseNpgsql(builder.Configuration["ConnectionStrings:dev"]);
@@ -57,9 +60,54 @@ builder.Services.AddDbContext<Context>(options =>
             ValidateIssuerSigningKey = true,
             ClockSkew = TimeSpan.Zero
         };
+    })
+    .Services.AddAuthorization(options =>
+    {
+        options.AddPolicy("IsStaff", policy => policy.RequireRole("Staff"));
+        options.AddPolicy("IsAdmin", policy => policy.RequireRole("Admin"));
+        options.AddPolicy("IsStudent", policy => policy.RequireRole("Student"));
+        options.AddPolicy("IsAdminStaff", policy => policy.RequireRole("AdminStaff"));
+        options.AddPolicy("IsAdminOrStaff", policy =>
+            policy.RequireAssertion(context =>
+                context.User.HasClaim(c => c is
+                    { Type: ClaimTypes.Role, Value: "Admin" } or
+                    { Type: ClaimTypes.Role, Value: "Staff" } or
+                    { Type: ClaimTypes.Role, Value: "IsAdminStaff" }
+                )
+            ));
+        options.AddPolicy("IsElevatedUser", policy =>
+            policy.RequireAssertion(context =>
+                context.User.HasClaim(c => c is
+                    { Type: ClaimTypes.Role, Value: "Admin" } or
+                    { Type: ClaimTypes.Role, Value: "IsAdminStaff" }
+                )
+            ));
     });
-var app = builder.Build();
+builder.Services.AddControllers().AddNewtonsoftJson(options =>
+    options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+);
 
+builder.Host.UseSerilog((ctx, lc) =>
+    lc.MinimumLevel.Information()
+        .WriteTo.Console());
+
+builder.Services.AddSwaggerGen().AddReverseProxy();
+builder.Services.AddMvcCore();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowOrigin", builder =>
+    {
+        builder.WithOrigins("http://localhost:4200")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+});
+
+// Register AutoMapper
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -71,11 +119,8 @@ app.UseCors("AllowOrigin");
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseRateLimiter();
 app.UseMiddleware<RequestMiddleware>();
 app.UseEndpoints(endpoints => endpoints.MapControllers());
-app.UseHttpsRedirection();
-
 
 using var scope = app.Services.CreateScope();
 var db = scope.ServiceProvider.GetRequiredService<Context>();

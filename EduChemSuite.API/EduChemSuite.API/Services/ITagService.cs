@@ -7,13 +7,13 @@ public interface ITagService : IBaseService<Tag>
 {
     Task<IEnumerable<Tag>> List();
 }
-public class TagService(Context context, DbSet<Tag> tags)
-    : BaseService<Tag>(context, tags), ITagService
+public class TagService(Context context)
+    : BaseService<Tag>(context), ITagService
 {
-    private readonly DbSet<Tag> _tags = tags;
+    private readonly Context _context = context;
 
     public Task<IEnumerable<Tag>> List()
     {
-        return Task.FromResult<IEnumerable<Tag>>(_tags);
+        return Task.FromResult<IEnumerable<Tag>>(_context.Tags);
     }
 }

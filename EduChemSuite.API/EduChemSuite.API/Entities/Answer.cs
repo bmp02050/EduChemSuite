@@ -8,4 +8,5 @@ public class Answer : BaseEntity
     public virtual Question? Question { get; set; }
     public required String AnswerText { get; set; }
     public required Boolean IsCorrect { get; set; }
+    public virtual ICollection<ExamResponse>? ExamResponses { get; set; }
 }

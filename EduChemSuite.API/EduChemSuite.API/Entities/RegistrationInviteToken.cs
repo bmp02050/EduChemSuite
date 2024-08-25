@@ -2,7 +2,7 @@
 
 namespace EduChemSuite.API.Entities;
 
-public class RegistrationInviteToken 
+public class RegistrationInviteToken
 {
     [Key] public virtual Guid Id { get; set; }
     public required string Token { get; set; }

@@ -10,18 +10,18 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace EduChemSuite.API.Services;
 
-public interface ITokenRepositoryService
+public interface ITokenService
 {
     Task<AuthenticateResponse?> AuthenticateAsync(AuthenticateModel model);
     Task<String> GenerateRegistrationInvitationTokenAsync(User user);
     Task<Boolean> ConfirmRegistrationAsync(Guid userId, String token);
-    Task<AuthenticateResponse> RefreshTokenAsync(Guid userId, String refreshToken);
+    Task<AuthenticateResponse?> RefreshTokenAsync(Guid userId, String refreshToken);
 }
 
-public class TokenService(Context context, IOptions<Jwt> jwtSettings) : ITokenRepositoryService
+public class TokenService(Context context, IOptions<Jwt> jwtSettings) : ITokenService
 {
     private readonly Jwt _jwt = jwtSettings.Value;
-    
+
     public async Task<String> GenerateRegistrationInvitationTokenAsync(User user)
     {
         var tokenData = new byte[32];
@@ -43,11 +43,11 @@ public class TokenService(Context context, IOptions<Jwt> jwtSettings) : ITokenRe
         return newToken.Entity.Token;
     }
 
-    public async Task<AuthenticateResponse> RefreshTokenAsync(Guid userId, String refreshToken)
+    public async Task<AuthenticateResponse?> RefreshTokenAsync(Guid userId, String refreshToken)
     {
         if (context.Users == null) throw new Exception("User Context is null.");
 
-        var user = await context.Users.Include(user => user.AccountType).FirstOrDefaultAsync(x => x.Id == userId);
+        var user = await context.Users.FirstOrDefaultAsync(x => x.Id == userId);
         if (user is null)
             throw new Exception("Invalid user");
 
@@ -62,12 +62,20 @@ public class TokenService(Context context, IOptions<Jwt> jwtSettings) : ITokenRe
             throw new Exception("Refresh token has expired. Please log in again.");
 
         var tokens = await GetTokens(user);
-        return new AuthenticateResponse(new UserModel()
+        return new AuthenticateResponse(new UserModel
         {
             Id = user.Id,
             Email = user.Email,
             AccountType = user.AccountType,
-            IsAdmin = user.IsAdmin ?? false,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Address1 = user.Address1,
+            Password = null,
+            City = user.City,
+            State = user.State,
+            Country = user.Country,
+            Zip = user.Zip,
+            Phone = user.Phone,
         }, tokens.authToken, tokens.refreshToken);
     }
 
@@ -94,8 +102,7 @@ public class TokenService(Context context, IOptions<Jwt> jwtSettings) : ITokenRe
             string.IsNullOrEmpty(model.Password))
             return null;
 
-        var user = await context.Users.Include(user => user.AccountType)
-            .FirstOrDefaultAsync(x => x.Email == model.Email);
+        var user = await context.Users.FirstOrDefaultAsync(x => x.Email == model.Email);
 
         if (user == null)
             return null;
@@ -113,7 +120,15 @@ public class TokenService(Context context, IOptions<Jwt> jwtSettings) : ITokenRe
             Id = user.Id,
             Email = user.Email,
             AccountType = user.AccountType,
-            IsAdmin = user.IsAdmin ?? false,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Address1 = user.Address1,
+            Password = null,
+            City = user.City,
+            State = user.State,
+            Country = user.Country,
+            Zip = user.Zip,
+            Phone = user.Phone,
         }, tokens.authToken, tokens.refreshToken);
     }
 
@@ -132,9 +147,9 @@ public class TokenService(Context context, IOptions<Jwt> jwtSettings) : ITokenRe
         {
             new("Id", user.Id.ToString()),
             new(JwtRegisteredClaimNames.Email, user.Email),
-            new(JwtRegisteredClaimNames.Jti, user.Id.ToString())
+            new(JwtRegisteredClaimNames.Jti, user.Id.ToString()),
+            new(ClaimTypes.Role, user.AccountType.ToString()),
         };
-
 
         var accessTokenDescriptor = new SecurityTokenDescriptor
         {
@@ -179,7 +194,7 @@ public class TokenService(Context context, IOptions<Jwt> jwtSettings) : ITokenRe
         await context.SaveChangesAsync();
     }
 
-    private string GenerateRefreshToken()
+    private static string GenerateRefreshToken()
     {
         var randomNumber = new byte[32];
         using var rng = RandomNumberGenerator.Create();
@@ -189,7 +204,7 @@ public class TokenService(Context context, IOptions<Jwt> jwtSettings) : ITokenRe
 
     private static bool VerifyPasswordHash(string password, byte[] storedHash, byte[] storedSalt)
     {
-        if (password == null) throw new ArgumentNullException("password");
+        ArgumentNullException.ThrowIfNull(password);
         if (string.IsNullOrWhiteSpace(password))
             throw new ArgumentException("Value cannot be empty or whitespace only string.", "password");
         if (storedHash.Length != 64)

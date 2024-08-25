@@ -8,8 +8,8 @@ public interface IExamResponseService : IBaseService<ExamResponse>
     Task<IEnumerable<ExamResponse>> Find(Guid id);
 }
 
-public class ExamResponseService(Context context, DbSet<ExamResponse> examResponses)
-    : BaseService<ExamResponse>(context, examResponses), IExamResponseService
+public class ExamResponseService(Context context)
+    : BaseService<ExamResponse>(context), IExamResponseService
 {
     private readonly Context _context = context;
 

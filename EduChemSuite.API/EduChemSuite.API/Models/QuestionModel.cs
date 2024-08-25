@@ -6,6 +6,6 @@ public class QuestionModel : BaseModel
     public UserModel? User { get; set; }
     public required String QuestionText { get; set; }
     public required Guid QuestionTypeId { get; set; }
-    public required QuestionTypeModel QuestionType { get; set; }
-    public ICollection<QuestionTagModel>? QuestionTags { get; set; }
+    public virtual QuestionTypeModel? QuestionType { get; set; }
+    public virtual ICollection<QuestionTagModel>? QuestionTags { get; set; }
 }

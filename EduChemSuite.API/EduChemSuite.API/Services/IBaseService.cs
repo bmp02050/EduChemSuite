@@ -9,7 +9,7 @@ public interface IBaseService<T>
     Task<T?> Update(T t);
 }
 
-public class BaseService<T>(Context context, DbSet<T> dbSet) : IBaseService<T> where T : class
+public class BaseService<T>(Context context) : IBaseService<T> where T : class
 {
     public async Task<T?> GetById(Guid id)
     {
@@ -20,13 +20,13 @@ public class BaseService<T>(Context context, DbSet<T> dbSet) : IBaseService<T> w
             throw new Exception($"Entity {entityType.Name} does not have an Id property.");
         }
 
-        return await dbSet
+        return await context.Set<T>()
             .FirstOrDefaultAsync(x => EF.Property<Guid>(x, "Id") == id);
     }
 
     public async Task<T> Create(T t)
     {
-        var entityEntry = await dbSet.AddAsync(t);
+        var entityEntry = await context.Set<T>().AddAsync(t);
         await context.SaveChangesAsync();
         return entityEntry.Entity;
     }

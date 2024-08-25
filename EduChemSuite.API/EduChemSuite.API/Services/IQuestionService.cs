@@ -9,14 +9,13 @@ public interface IQuestionService : IBaseService<Question>
     public Task<IEnumerable<Question>> SearchTags(IEnumerable<String> tags);
 }
 
-public class QuestionService(Context context, DbSet<Question> questions)
-    : BaseService<Question>(context, questions), IQuestionService
+public class QuestionService(Context context)
+    : BaseService<Question>(context), IQuestionService
 {
-    private readonly DbSet<Question> _questions = questions;
 
     public async Task<IEnumerable<Question>> FindById(Guid id)
     {
-        return await _questions.Where(
+        return await context.Questions.Where(
                 x => x.Id == id ||
                      x.UserId == id ||
                      x.QuestionTypeId == id)
@@ -26,7 +25,7 @@ public class QuestionService(Context context, DbSet<Question> questions)
     public async Task<IEnumerable<Question>> SearchTags(IEnumerable<string> tags)
     {
         var tagList = tags.ToList();
-        var results = await _questions
+        var results = await context.Questions
             .Where(q => q.QuestionTags != null && q.QuestionTags
                 .Any(qt => qt.Tag != null && tagList.Contains(qt.Tag.TagText)))
             .ToListAsync();

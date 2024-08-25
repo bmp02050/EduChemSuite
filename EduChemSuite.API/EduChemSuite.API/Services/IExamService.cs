@@ -8,7 +8,7 @@ public interface IExamService : IBaseService<Exam>
     Task<IEnumerable<Exam?>> Find(Guid id);
 }
 
-public class ExamService(Context context, DbSet<Exam> exams) : BaseService<Exam>(context, exams), IExamService 
+public class ExamService(Context context) : BaseService<Exam>(context), IExamService 
 {
     private readonly Context _context = context;
     

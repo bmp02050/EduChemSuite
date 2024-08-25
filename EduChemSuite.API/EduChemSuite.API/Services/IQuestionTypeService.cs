@@ -7,8 +7,8 @@ public interface IQuestionTypeService : IBaseService<QuestionType>
 {
 }
 
-public class QuestionTypeService(Context context, DbSet<QuestionType> questionType)
-    : BaseService<QuestionType>(context, questionType), IQuestionTypeService
+public class QuestionTypeService(Context context)
+    : BaseService<QuestionType>(context), IQuestionTypeService
 {
     
 }

@@ -1,6 +1,4 @@
-﻿using System.Collections;
-
-namespace EduChemSuite.API.Entities;
+﻿namespace EduChemSuite.API.Entities;
 
 public class Exam : BaseEntity
 {

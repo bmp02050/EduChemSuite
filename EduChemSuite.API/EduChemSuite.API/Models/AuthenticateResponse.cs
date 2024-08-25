@@ -15,7 +15,7 @@ public class AuthenticateResponse
         Success = true;
     }
 
-    public Guid Id { get; set; }
+    public Guid? Id { get; set; }
     public String? Email { get; set; }
     public String? AccessToken { get; set; }
     public String? RefreshToken { get; set; }

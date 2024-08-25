@@ -8,8 +8,8 @@ public interface IImageTypeService : IBaseService<ImageType>
     Task<IEnumerable<ImageType>> List();
 }
 
-public class ImageTypeService(Context context, DbSet<ImageType> imageTypes)
-    : BaseService<ImageType>(context, imageTypes), IImageTypeService
+public class ImageTypeService(Context context)
+    : BaseService<ImageType>(context), IImageTypeService
 {
     private readonly Context _context = context;
 

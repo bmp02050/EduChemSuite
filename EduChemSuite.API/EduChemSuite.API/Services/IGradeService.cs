@@ -8,7 +8,7 @@ public interface IGradeService : IBaseService<Grade>
     Task<IEnumerable<Grade?>> Find(Guid id);
 }
 
-public class GradeService(Context context, DbSet<Grade> grades) : BaseService<Grade>(context, grades), IGradeService
+public class GradeService(Context context) : BaseService<Grade>(context), IGradeService
 {
     private readonly Context _context = context;
     

@@ -8,8 +8,6 @@ namespace EduChemSuite.API
     {
         public AutoMapperProfile()
         {
-            CreateMap<AccountType, AccountTypeModel>();
-            CreateMap<AccountTypeModel, AccountType>();
             CreateMap<Answer, AnswerModel>();
             CreateMap<AnswerModel, Answer>();
             CreateMap<Exam, ExamModel>();
@@ -31,15 +29,26 @@ namespace EduChemSuite.API
             CreateMap<Tag, TagModel>();
             CreateMap<TagModel, Tag>();
             CreateMap<User, UserModel>();
-            CreateMap<UserModel, User>();
+            CreateMap<UserModel, User>()
+                .ForMember(dest => dest.PasswordHash, opt => opt.Ignore())
+                .ForMember(dest => dest.PasswordSalt, opt => opt.Ignore())
+                .ForMember(dest => dest.CreateDate, opt => opt.Ignore())
+                .ForMember(dest => dest.UpdatedDate, opt => opt.Ignore())
+                .ForMember(dest => dest.VerifiedEmail, opt => opt.Ignore())
+                .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => src.IsActive));
             CreateMap<School, SchoolModel>();
             CreateMap<SchoolModel, School>();
             CreateMap<District, DistrictModel>();
             CreateMap<DistrictModel, District>();
-            CreateMap<UserDistrict, UserDistrictModel>();
-            CreateMap<UserDistrictModel, UserDistrict>();
+            CreateMap<UpsertDistrictModel, District>();
             CreateMap<UserSchool, UserSchoolModel>();
             CreateMap<UserSchoolModel, UserSchool>();
+            CreateMap<NewUserModel, User>();
+            CreateMap<DistrictSchools, DistrictSchoolsModel>();
+            CreateMap<DistrictSchoolsModel, DistrictSchools>();
+            CreateMap<DistrictSchoolsModel, DistrictSchools>();
+            CreateMap<UserDistrict, UserDistrictModel>();
+            CreateMap<UserDistrictModel, UserDistrict>();
         }
     }
 }

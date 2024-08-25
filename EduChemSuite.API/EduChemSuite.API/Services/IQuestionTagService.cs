@@ -7,7 +7,7 @@ public interface IQuestionTagService : IBaseService<QuestionTag>
 {
 }
 
-public class QuestionTagService(Context context, DbSet<QuestionTag> questionTags)
-    : BaseService<QuestionTag>(context, questionTags), IQuestionTagService
+public class QuestionTagService(Context context)
+    : BaseService<QuestionTag>(context), IQuestionTagService
 {
 }

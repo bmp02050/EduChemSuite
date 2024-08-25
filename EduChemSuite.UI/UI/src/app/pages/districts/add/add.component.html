@@ -1,0 +1,25 @@
+<form [formGroup]="upsertDistrictForm" (ngSubmit)="onSubmit()">
+  <div>
+    <label for="districtName">District Name:</label>
+    <input id="districtName" formControlName="districtName"/>
+  </div>
+
+  <div>
+    <input id="userId" formControlName="userId" type="hidden"/>
+  </div>
+
+  <div>
+    <input id="createdAt" formControlName="createdAt" type="datetime-local" type="hidden"/>
+  </div>
+
+  <div>
+    <input id="updatedAt" formControlName="updatedAt" type="datetime-local" type="hidden"/>
+  </div>
+
+  <div>
+    <label for="isActive">Is Active:</label>
+    <input id="isActive" type="checkbox" formControlName="isActive"/>
+  </div>
+
+  <button type="submit">Submit</button>
+</form>

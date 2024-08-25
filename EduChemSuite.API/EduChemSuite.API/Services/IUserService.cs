@@ -1,30 +1,32 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 using EduChemSuite.API.Entities;
+using EduChemSuite.API.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace EduChemSuite.API.Services;
 
 public interface IUserService
 {
-    Task<User> GetById(Guid id);
+    Task<User?> GetById(Guid id);
     Task<User> Create(User user, string password);
     Task<User> Update(User user, String? password = null);
+
+    Task<IEnumerable<User>> ListByDistrict(Guid districtId);
+    Task<IEnumerable<User>> ListBySchool(Guid schoolId);
+    Task<User?> AddQuestionToUser(Question question);
 }
 
 public class UserService(Context context) : IUserService
 {
-    public async Task<User> GetById(Guid id)
+    public async Task<User?> GetById(Guid id)
     {
         return await context.Users.Where(x => x.Id == id)
             .Include(x => x.Exams)
             .Include(x => x.ExamResponses)
-            .Include(x => x.AccountType)
-            .Include(x => x.UserDistricts)
-            .ThenInclude(x => x.District)
             .Include(x => x.UserSchools)
             .ThenInclude(x => x.School)
-            .FirstAsync();
+            .FirstOrDefaultAsync();
     }
 
     public async Task<User> Create(User user, string password)
@@ -89,9 +91,37 @@ public class UserService(Context context) : IUserService
         return user;
     }
 
+    public async Task<IEnumerable<User>> ListByDistrict(Guid districtId)
+    {
+        return await context.Users
+            .Where(x => x.UserDistricts != null && x.UserDistricts.Any(d => d.DistrictId == districtId)).ToListAsync();
+    }
+
+    public async Task<IEnumerable<User>> ListBySchool(Guid schoolId)
+    {
+        return await context.Users
+            .Where(x => x.UserSchools != null &&
+                        x.UserSchools.Any(y => y.SchoolId == schoolId))
+            .ToListAsync();
+    }
+
+    public async Task<User?> AddQuestionToUser(Question question)
+    {
+        var user = await GetById(question.UserId);
+        if (user != null && (user is { Questions: null } || user.Questions.Count == 0))
+            user.Questions = new List<Question>();
+        
+        if (user is { Questions: not null } && user.Questions.All(x => x.Id != question.Id))
+            user.Questions?.Add(question);
+        
+        await context.SaveChangesAsync();
+        return user;
+    }
+
     private static void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
     {
-        if (password == null) throw new ArgumentNullException("password");
+        ArgumentNullException.ThrowIfNull(password);
+
         if (string.IsNullOrWhiteSpace(password))
             throw new ArgumentException("Value cannot be empty or whitespace only string.", "password");
 

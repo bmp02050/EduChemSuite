@@ -1,0 +1,71 @@
+<ng-container *ngIf="{
+districts: myDistricts$ | async,
+users: users$ | async
+} as data">
+  <div class="dropdown-container">
+    <label for="districtSelect">Districts</label>
+    <nz-select
+      id="districtSelect"
+      [nzOptions]="data.districts || []"
+      nzPlaceHolder="Select a district"
+      class="dropdown-select"
+      [(ngModel)]="selectedDistrictId"
+      (ngModelChange)="onDistrictSelect($event)"
+    ></nz-select>
+  </div>
+  <div class="selectedDistrict" *ngIf="selectedDistrict$ | async as selectedDistrict">
+    <form [formGroup]="districtForm">
+
+      <div>
+        <label for="id">District ID</label>
+        <input id="id" formControlName="id" type="text" readonly />
+      </div>
+
+      <div>
+        <label for="districtName">District Name</label>
+        <input id="districtName" formControlName="districtName" type="text" readonly />
+      </div>
+
+      <div>
+        <label for="createdAt">Created At</label>
+        <input id="createdAt" formControlName="createdAt" type="text" readonly />
+      </div>
+
+      <div>
+        <label for="updatedAt">Updated At</label>
+        <input id="updatedAt" formControlName="updatedAt" type="text" readonly />
+      </div>
+
+      <div>
+        <label for="isActive">Is Active</label>
+        <input id="isActive" formControlName="isActive" type="checkbox" readonly />
+      </div>
+
+      <div formArrayName="administrators">
+        <label>Administrators</label>
+        <div *ngFor="let admin of administrators.controls; let i = index">
+          <div [formGroupName]="i">
+            <input formControlName="name" readonly>
+          </div>
+        </div>
+      </div>
+
+      <div formArrayName="schools">
+        <label>Schools</label>
+        <div *ngFor="let school of schools.controls; let i = index">
+          <input [formControlName]="i" [value]="school.value.schoolId" readonly />
+        </div>
+      </div>
+      <button type="button" (click)="onSubmit()">Submit</button>
+    </form>
+  </div>
+  <div class="dropdown-container">
+    <label for="administratorsSelect">Add Administrators</label>
+    <nz-select
+      id="administratorsSelect"
+      [nzOptions]="data.users || []"
+      nzPlaceHolder="Select a user"
+      class="dropdown-select"
+    ></nz-select>
+  </div>
+</ng-container>

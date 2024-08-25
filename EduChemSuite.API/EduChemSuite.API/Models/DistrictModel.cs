@@ -3,6 +3,6 @@
 public class DistrictModel : BaseModel
 {
     public required String DistrictName { get; set; }
-    public ICollection<UserModel>? Administrators { get; set; }
-    public ICollection<SchoolModel>? Schools { get; set; }
+    public virtual ICollection<UserDistrictModel>? Administrators { get; set; }
+    public virtual ICollection<DistrictSchoolsModel>? Schools { get; set; }
 }

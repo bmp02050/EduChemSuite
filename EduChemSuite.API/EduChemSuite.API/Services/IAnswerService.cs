@@ -8,8 +8,8 @@ public interface IAnswerService : IBaseService<Answer>
     Task<IEnumerable<Answer>> ListByQuestion(Guid questionId);
 }
 
-public class AnswerService(Context context, DbSet<Answer> answers)
-    : BaseService<Answer>(context, answers), IAnswerService
+public class AnswerService(Context context)
+    : BaseService<Answer>(context), IAnswerService
 {
     private readonly Context _context = context;
 

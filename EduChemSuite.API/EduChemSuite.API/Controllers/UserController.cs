@@ -13,14 +13,18 @@ namespace EduChemSuite.API.Controllers;
 public class UserController(
     IUserService userService,
     IMapper mapper,
-    ITokenRepositoryService tokenService,
+    ITokenService tokenService,
     IEmailService emailService,
     ILogger<UserController> logger) : Controller
 {
-    [AllowAnonymous]
+    [Authorize(Policy = "IsElevatedUser")]
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] UserModel model)
+    public async Task<IActionResult> Create([FromBody] UserModel model)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
         // map model to entity
         var user = mapper.Map<User>(model);
 
@@ -28,10 +32,9 @@ public class UserController(
         {
             // create user
             var result = await userService.Create(user, model.Password);
-
             var token = await tokenService.GenerateRegistrationInvitationTokenAsync(result);
             var confirmationLink =
-                Url.Action("ConfirmEmail", "Users", new { userId = result.Id, token }, Request.Scheme);
+                Url.Action("ConfirmEmail", "User", new { userId = result.Id, token }, Request.Scheme);
 
             await emailService.SendEmailAsync(result.Email, "Confirm Email", confirmationLink);
 
@@ -55,7 +58,7 @@ public class UserController(
 
             var token = await tokenService.GenerateRegistrationInvitationTokenAsync(user);
             var confirmationLink =
-                Url.Action("ConfirmEmail", "Users", new { userId = user.Id, token }, Request.Scheme);
+                Url.Action("ConfirmEmail", "User", new { userId = user.Id, token }, Request.Scheme);
 
             await emailService.SendEmailAsync(user.Email, "Confirm Email", confirmationLink);
             return Ok("Email verification resent");
@@ -140,6 +143,7 @@ public class UserController(
         {
             // Email confirmed successfully
             user.VerifiedEmail = result;
+            user.IsActive = true;
             await userService.Update(user);
             return Ok("Email confirmed. You can now log in.");
         }
