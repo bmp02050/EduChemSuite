@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EduChemSuite.API.Entities;
 
-public class TokenRepository : BaseEntity
+public class Token : BaseEntity
 {
     [ForeignKey("UserId")] [Required] public Guid UserId { get; set; }
     public required String RefreshToken { get; set; }

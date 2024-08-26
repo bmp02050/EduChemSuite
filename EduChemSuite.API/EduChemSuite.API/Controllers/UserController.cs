@@ -4,19 +4,35 @@ using EduChemSuite.API.Models;
 using EduChemSuite.API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace EduChemSuite.API.Controllers;
 
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
-public class UserController(
-    IUserService userService,
-    IMapper mapper,
-    ITokenService tokenService,
-    IEmailService emailService,
-    ILogger<UserController> logger) : Controller
+public class UserController : ControllerBase
 {
+    private readonly IUserService _userService;
+    private readonly IMapper _mapper;
+    private readonly ITokenService _tokenService;
+    private readonly IEmailService _emailService;
+    private readonly ILogger<UserController> _logger;
+
+    public UserController(
+        IUserService userService,
+        IMapper mapper,
+        ITokenService tokenService,
+        IEmailService emailService,
+        ILogger<UserController> logger)
+    {
+        _userService = userService;
+        _mapper = mapper;
+        _tokenService = tokenService;
+        _emailService = emailService;
+        _logger = logger;
+    }
+
     [Authorize(Policy = "IsElevatedUser")]
     [HttpPost("register")]
     public async Task<IActionResult> Create([FromBody] UserModel model)
@@ -25,26 +41,24 @@ public class UserController(
         {
             return BadRequest(ModelState);
         }
-        // map model to entity
-        var user = mapper.Map<User>(model);
 
         try
         {
-            // create user
-            var result = await userService.Create(user, model.Password);
-            var token = await tokenService.GenerateRegistrationInvitationTokenAsync(result);
-            var confirmationLink =
-                Url.Action("ConfirmEmail", "User", new { userId = result.Id, token }, Request.Scheme);
+            var userModel = await _userService.Create(model, model.Password);
 
-            await emailService.SendEmailAsync(result.Email, "Confirm Email", confirmationLink);
+            var token = await _tokenService.GenerateRegistrationInvitationTokenAsync(userModel.Id);
+            var confirmationLink = Url.Action("ConfirmEmail", "User", new { userId = userModel.Id, token }, Request.Scheme);
+            if (confirmationLink is null)
+                throw new Exception("Could not create confirmation link");
+            
+            await _emailService.SendEmailAsync(userModel.Email, "Confirm Email", confirmationLink);
 
-            return Ok(mapper.Map<UserModel>(result));
+            return Ok(userModel);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred during user registration");
-            // return error message if there was an exception
-            return BadRequest(ex);
+            _logger.LogError(ex, "An error occurred during user registration");
+            return BadRequest(new { message = ex.Message });
         }
     }
 
@@ -54,19 +68,17 @@ public class UserController(
     {
         try
         {
-            var user = await userService.GetById(id);
-
-            var token = await tokenService.GenerateRegistrationInvitationTokenAsync(user);
-            var confirmationLink =
-                Url.Action("ConfirmEmail", "User", new { userId = user.Id, token }, Request.Scheme);
-
-            await emailService.SendEmailAsync(user.Email, "Confirm Email", confirmationLink);
+            var token = await _tokenService.GenerateRegistrationInvitationTokenAsync(id);
+            var confirmationLink = Url.Action("ConfirmEmail", "User", new { userId = id, token }, Request.Scheme);
+            var userModel = await _userService.GetById(id);
+            
+            await _emailService.SendEmailAsync(userModel.Email, "Confirm Email", confirmationLink);
             return Ok("Email verification resent");
         }
         catch (Exception e)
         {
-            logger.LogError(e, message: e?.Message);
-            return BadRequest(e.ToString());
+            _logger.LogError(e, e.Message);
+            return BadRequest(new { message = e.Message });
         }
     }
 
@@ -74,22 +86,20 @@ public class UserController(
     public async Task<IActionResult> Update([FromBody] UserModel model, Guid id)
     {
         var userId = User.FindFirst("Id")?.Value;
-        if (!String.IsNullOrEmpty(userId) && id != new Guid(userId))
-            throw new UnauthorizedAccessException("You are not this person or the ID is missing");
+        if (!string.IsNullOrEmpty(userId) && id != new Guid(userId))
+            return Unauthorized("You are not authorized to update this user");
+
         if (model.Id == Guid.Empty)
             model.Id = id;
-        // map model to entity and set id
-        var user = mapper.Map<User>(model);
 
         try
         {
-            // update user 
-            return Ok(mapper.Map<UserModel>(
-                await userService.Update(user, model.Password)));
+            var updatedUser = await _userService.Update(model, model.Password);
+            return Ok(updatedUser);
         }
         catch (Exception ex)
         {
-            // return error message if there was an exception
+            _logger.LogError(ex, "An error occurred during user update");
             return BadRequest(new { message = ex.Message });
         }
     }
@@ -99,56 +109,74 @@ public class UserController(
     {
         try
         {
-            // update user 
-            return Ok(await userService.GetById(id));
+            var user = await _userService.GetById(id);
+            if (user == null)
+                return NotFound("User not found");
+
+            return Ok(user);
         }
         catch (Exception ex)
         {
-            // return error message if there was an exception
+            _logger.LogError(ex, "An error occurred while fetching the user");
             return BadRequest(new { message = ex.Message });
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
     [Authorize]
-    [HttpGet]
-    [Route("me")]
+    [HttpGet("me")]
     public async Task<IActionResult> Me()
     {
         var userId = User.FindFirst("Id")?.Value;
-        if (String.IsNullOrEmpty(userId))
-            return BadRequest("UserID is not found");
+        if (string.IsNullOrEmpty(userId))
+            return BadRequest("User ID not found");
 
-        var user = await userService.GetById(new Guid(userId));
-        var userModel = mapper.Map<UserModel>(user);
-        return Ok(userModel);
+        try
+        {
+            var user = await _userService.GetById(new Guid(userId));
+            if (user == null)
+                return NotFound("User not found");
+
+            return Ok(user);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while fetching the current user");
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     [AllowAnonymous]
     [HttpGet("confirm-email")]
     public async Task<IActionResult> ConfirmEmail(string userId, string token)
     {
-        if (userId == null || token == null)
+        if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token))
         {
             return BadRequest("Invalid confirmation link.");
         }
 
-        var user = await userService.GetById(new Guid(userId));
-        var result = await tokenService.ConfirmRegistrationAsync(user.Id, token);
-
-        if (result)
+        try
         {
-            // Email confirmed successfully
-            user.VerifiedEmail = result;
-            user.IsActive = true;
-            await userService.Update(user);
-            return Ok("Email confirmed. You can now log in.");
-        }
+            var user = await _userService.GetById(new Guid(userId));
+            if (user == null)
+                return NotFound("User not found");
 
-        // Handle confirmation failure
-        return BadRequest("Email confirmation failed.");
+            var result = await _tokenService.ConfirmRegistrationAsync(user.Id, token);
+
+            if (result)
+            {
+                user.VerifiedEmail = true;
+                user.IsActive = true;
+                await _userService.Update(user);
+
+                return Ok("Email confirmed. You can now log in.");
+            }
+
+            return BadRequest("Email confirmation failed.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred during email confirmation");
+            return BadRequest(new { message = ex.Message });
+        }
     }
 }

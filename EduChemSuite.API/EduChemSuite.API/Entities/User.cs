@@ -21,7 +21,7 @@ public class User : BaseEntity
     [IgnoreDataMember] public required byte[] PasswordSalt { get; set; }
     [IgnoreDataMember] public DateTime? CreateDate { get; set; }
     [IgnoreDataMember] public DateTime? UpdatedDate { get; set; }
-    [IgnoreDataMember] public Boolean VerifiedEmail { get; set; }
+    public Boolean VerifiedEmail { get; set; }
     public virtual ICollection<Exam>? Exams { get; set; }
     public virtual ICollection<Grade>? Grades { get; set; }
     public virtual ICollection<ExamResponse>? ExamResponses { get; set; }

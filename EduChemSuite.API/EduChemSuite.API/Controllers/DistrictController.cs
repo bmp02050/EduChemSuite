@@ -45,7 +45,7 @@ public class DistrictController(
         catch (Exception ex)
         {
             logger.LogError(ex, "An error occurred during district creation");
-            // return error message if there was an exception
+            
             return BadRequest(ex);
         }
     }
@@ -61,7 +61,7 @@ public class DistrictController(
         catch (Exception ex)
         {
             logger.LogError(ex, "An error occurred during district creation");
-            // return error message if there was an exception
+            
             return BadRequest(ex);
         }
     }
@@ -77,7 +77,7 @@ public class DistrictController(
         catch (Exception ex)
         {
             logger.LogError(ex, "An error occurred during district creation");
-            // return error message if there was an exception
+            
             return BadRequest(ex);
         }
     }
@@ -93,7 +93,7 @@ public class DistrictController(
         catch (Exception ex)
         {
             logger.LogError(ex, "An error occurred while adding a school to a district-");
-            // return error message if there was an exception
+            
             return BadRequest(ex);
         }
     }

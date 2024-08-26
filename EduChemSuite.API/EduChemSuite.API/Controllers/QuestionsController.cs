@@ -1,4 +1,5 @@
 using AutoMapper;
+using EduChemSuite.API.Dao;
 using EduChemSuite.API.Entities;
 using EduChemSuite.API.Models;
 using EduChemSuite.API.Services;
@@ -17,7 +18,7 @@ public class QuestionsController(
     IMapper mapper) : Controller
 {
     [HttpPost("")]
-    public async Task<IActionResult> Create([FromBody] QuestionModel model)
+    public async Task<IActionResult> Create([FromBody] QuestionModel questionModel)
     {
         if (!ModelState.IsValid)
         {
@@ -26,11 +27,10 @@ public class QuestionsController(
 
         try
         {
-            var question = mapper.Map<Question>(model);
-            if (question.Id == Guid.Empty)
+            if (questionModel.Id == Guid.Empty)
             {
-                var result = await questionService.Create(question);
-                await userService.AddQuestionToUser(question);
+                var result = await questionService.Create(questionModel);
+                await userService.AddQuestionToUser(questionModel);
                 return Ok(mapper.Map<QuestionModel>(result));
             }
             else throw new Exception("Question already exists");
@@ -38,13 +38,12 @@ public class QuestionsController(
         catch (Exception ex)
         {
             logger.LogError(ex, "An error occurred during Question creation");
-            // return error message if there was an exception
             return BadRequest(ex);
         }
     }
 
     [HttpPost("{questionId}")]
-    public async Task<IActionResult> Update([FromBody] QuestionModel model)
+    public async Task<IActionResult> Update([FromBody] QuestionModel question)
     {
         if (!ModelState.IsValid)
         {
@@ -53,19 +52,18 @@ public class QuestionsController(
 
         try
         {
-            var question = mapper.Map<Question>(model);
-            if (question.Id != Guid.Empty)
-            {
-                var result = await questionService.Update(question);
-                return Ok(mapper.Map<QuestionModel>(result));
-            }
-            else throw new Exception("Question ID is empty or does not exist");
+            if (question.Id == Guid.Empty) 
+                throw new Exception("Question ID is empty or does not exist");
+            
+            var result = await questionService.Update(question);
+            return Ok(mapper.Map<QuestionModel>(result));
+
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "An error occurred during Question creation");
-            // return error message if there was an exception
             return BadRequest(ex);
         }
     }
+    
 }

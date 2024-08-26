@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using System.Text;
 using EduChemSuite.API;
+using EduChemSuite.API.Dao;
 using EduChemSuite.API.Helpers;
 using EduChemSuite.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -28,7 +29,7 @@ builder.Services
     .AddTransient<IExamService, ExamService>()
     .AddTransient<IGradeService, GradeService>()
     .AddTransient<IImageTypeService, ImageTypeService>()
-    .AddTransient<IQuestionService, QuestionService>()
+    .AddTransient<IQuestionRepository, QuestionRepository>()
     .AddTransient<IQuestionTagService, QuestionTagService>()
     .AddTransient<IQuestionTypeService, QuestionTypeService>()
     .AddTransient<ISchoolService, SchoolService>()

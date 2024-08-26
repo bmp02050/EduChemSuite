@@ -1,34 +1,50 @@
-﻿using EduChemSuite.API.Entities;
-using Microsoft.EntityFrameworkCore;
+using AutoMapper;
+using EduChemSuite.API.Dao;
+using EduChemSuite.API.Entities;
+using EduChemSuite.API.Models;
 
 namespace EduChemSuite.API.Services;
 
-public interface IQuestionService : IBaseService<Question>
+public interface IQuestionService
 {
-    public Task<IEnumerable<Question>> FindById(Guid id);
-    public Task<IEnumerable<Question>> SearchTags(IEnumerable<String> tags);
+    Task<QuestionModel?> GetById(Guid id);
+    Task<QuestionModel> Create(QuestionModel question);
+    Task<QuestionModel?> Update(QuestionModel question);
+    public Task<IEnumerable<QuestionModel>> FindById(Guid id);
+    public Task<IEnumerable<QuestionModel>> SearchTags(IEnumerable<String> tags);
 }
 
-public class QuestionService(Context context)
-    : BaseService<Question>(context), IQuestionService
+public class QuestionService(IQuestionRepository questionRepository, IMapper mapper) : IQuestionService
 {
-
-    public async Task<IEnumerable<Question>> FindById(Guid id)
+    public async Task<QuestionModel?> GetById(Guid id)
     {
-        return await context.Questions.Where(
-                x => x.Id == id ||
-                     x.UserId == id ||
-                     x.QuestionTypeId == id)
-            .ToListAsync();
+        var question = await questionRepository.GetById(id);
+        if (question is null)
+            throw new KeyNotFoundException("Question not found");
+        return mapper.Map<QuestionModel>(question);
     }
 
-    public async Task<IEnumerable<Question>> SearchTags(IEnumerable<string> tags)
+    public async Task<QuestionModel> Create(QuestionModel questionModel)
     {
-        var tagList = tags.ToList();
-        var results = await context.Questions
-            .Where(q => q.QuestionTags != null && q.QuestionTags
-                .Any(qt => qt.Tag != null && tagList.Contains(qt.Tag.TagText)))
-            .ToListAsync();
-        return results;
+        var question = mapper.Map<Question>(questionModel);
+        if (question is null)
+            throw new KeyNotFoundException("Question could not be created");
+        
+        return mapper.Map<QuestionModel>(await questionRepository.Create(question));
+    }
+
+    public async Task<QuestionModel?> Update(QuestionModel question)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<IEnumerable<QuestionModel>> FindById(Guid id)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<IEnumerable<QuestionModel>> SearchTags(IEnumerable<string> tags)
+    {
+        throw new NotImplementedException();
     }
 }

@@ -6,7 +6,7 @@ namespace EduChemSuite.API;
 public class Context(DbContextOptions<Context> options) : DbContext(options)
 {
     public DbSet<User> Users { get; set; }
-    public DbSet<TokenRepository> TokenRepository { get; set; }
+    public DbSet<Token> Token { get; set; }
     public DbSet<Answer> Answers { get; set; }
     public DbSet<District> Districts { get; set; }
     public DbSet<Exam> Exams { get; set; }
@@ -109,7 +109,7 @@ public class Context(DbContextOptions<Context> options) : DbContext(options)
             .HasOne(us => us.School)
             .WithMany(s => s.UserSchools)
             .HasForeignKey(us => us.SchoolId);
-
+        
         // Exam and ExamQuestion (one-to-many)
         modelBuilder.Entity<ExamQuestion>()
             .HasOne(eq => eq.Exam)
@@ -201,7 +201,7 @@ public class Context(DbContextOptions<Context> options) : DbContext(options)
         modelBuilder.Entity<RegistrationInviteToken>().Property(e => e.Id).ValueGeneratedOnAdd();
         modelBuilder.Entity<School>().Property(e => e.Id).ValueGeneratedOnAdd();
         modelBuilder.Entity<Tag>().Property(e => e.Id).ValueGeneratedOnAdd();
-        modelBuilder.Entity<TokenRepository>().Property(e => e.Id).ValueGeneratedOnAdd();
+        modelBuilder.Entity<Token>().Property(e => e.Id).ValueGeneratedOnAdd();
         modelBuilder.Entity<User>().Property(e => e.Id).ValueGeneratedOnAdd();
     }
 }

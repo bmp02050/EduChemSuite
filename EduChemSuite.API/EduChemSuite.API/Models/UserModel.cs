@@ -8,12 +8,13 @@ public class UserModel : BaseModel
     public AccountType AccountType { get; set; }
     [Required] public string Email { get; set; }
     [Required] public Boolean IsAdmin { get; set; }
+    public virtual ICollection<QuestionModel>? Questions { get; set; }
     public virtual ICollection<ExamModel>? Exams { get; set; }
     public virtual ICollection<ExamResponseModel>? ExamResponses { get; set; }
     public virtual ICollection<UserSchoolModel>? UserSchools { get; set; }
     public virtual ICollection<UserDistrictModel>? UserDistricts { get; set; }
     [Required] public String FirstName { get; set; }
-
+    public Boolean VerifiedEmail { get; set; }
     [Required] public String LastName { get; set; }
     [Required] public String Password { get; set; }
 

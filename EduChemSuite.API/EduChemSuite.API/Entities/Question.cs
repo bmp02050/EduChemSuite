@@ -8,9 +8,10 @@ public class Question : BaseEntity
     public virtual User? User { get; set; }
     public required String QuestionText { get; set; }
     [ForeignKey("QuestionTypeId")] public required Guid QuestionTypeId { get; set; }
-    public required QuestionType QuestionType { get; set; }
+    public QuestionType? QuestionType { get; set; }
     public virtual ICollection<QuestionTag>? QuestionTags { get; set; }
     public virtual ICollection<ExamQuestion>? ExamQuestions { get; set; }
     public virtual ICollection<ExamResponse>? ExamResponses { get; set; }
     public virtual ICollection<Answer>? Answers { get; set; }
+    public Int32 Version { get; set; }
 }

@@ -37,7 +37,7 @@ public class SchoolController(
         catch (Exception ex)
         {
             logger.LogError(ex, "An error occurred during School creation");
-            // return error message if there was an exception
+            
             return BadRequest(ex);
         }
     }
@@ -53,7 +53,7 @@ public class SchoolController(
         catch (Exception ex)
         {
             logger.LogError(ex, "An error occurred during School creation");
-            // return error message if there was an exception
+            
             return BadRequest(ex);
         }
     }
