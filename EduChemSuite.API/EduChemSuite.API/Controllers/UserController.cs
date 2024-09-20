@@ -11,27 +11,15 @@ namespace EduChemSuite.API.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
-public class UserController : ControllerBase
+public class UserController(
+    IUserService userService,
+    IMapper mapper,
+    ITokenService tokenService,
+    IEmailService emailService,
+    ILogger<UserController> logger)
+    : ControllerBase
 {
-    private readonly IUserService _userService;
-    private readonly IMapper _mapper;
-    private readonly ITokenService _tokenService;
-    private readonly IEmailService _emailService;
-    private readonly ILogger<UserController> _logger;
-
-    public UserController(
-        IUserService userService,
-        IMapper mapper,
-        ITokenService tokenService,
-        IEmailService emailService,
-        ILogger<UserController> logger)
-    {
-        _userService = userService;
-        _mapper = mapper;
-        _tokenService = tokenService;
-        _emailService = emailService;
-        _logger = logger;
-    }
+    private readonly IMapper _mapper = mapper;
 
     [Authorize(Policy = "IsElevatedUser")]
     [HttpPost("register")]
@@ -44,20 +32,20 @@ public class UserController : ControllerBase
 
         try
         {
-            var userModel = await _userService.Create(model, model.Password);
+            var userModel = await userService.Create(model, model.Password);
 
-            var token = await _tokenService.GenerateRegistrationInvitationTokenAsync(userModel.Id);
+            var token = await tokenService.GenerateRegistrationInvitationTokenAsync(userModel.Id);
             var confirmationLink = Url.Action("ConfirmEmail", "User", new { userId = userModel.Id, token }, Request.Scheme);
             if (confirmationLink is null)
                 throw new Exception("Could not create confirmation link");
             
-            await _emailService.SendEmailAsync(userModel.Email, "Confirm Email", confirmationLink);
+            await emailService.SendEmailAsync(userModel.Email, "Confirm Email", confirmationLink);
 
             return Ok(userModel);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred during user registration");
+            logger.LogError(ex, "An error occurred during user registration");
             return BadRequest(new { message = ex.Message });
         }
     }
@@ -68,16 +56,16 @@ public class UserController : ControllerBase
     {
         try
         {
-            var token = await _tokenService.GenerateRegistrationInvitationTokenAsync(id);
+            var token = await tokenService.GenerateRegistrationInvitationTokenAsync(id);
             var confirmationLink = Url.Action("ConfirmEmail", "User", new { userId = id, token }, Request.Scheme);
-            var userModel = await _userService.GetById(id);
+            var userModel = await userService.GetById(id);
             
-            await _emailService.SendEmailAsync(userModel.Email, "Confirm Email", confirmationLink);
+            await emailService.SendEmailAsync(userModel.Email, "Confirm Email", confirmationLink);
             return Ok("Email verification resent");
         }
         catch (Exception e)
         {
-            _logger.LogError(e, e.Message);
+            logger.LogError(e, e.Message);
             return BadRequest(new { message = e.Message });
         }
     }
@@ -94,12 +82,12 @@ public class UserController : ControllerBase
 
         try
         {
-            var updatedUser = await _userService.Update(model, model.Password);
+            var updatedUser = await userService.Update(model, model.Password);
             return Ok(updatedUser);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred during user update");
+            logger.LogError(ex, "An error occurred during user update");
             return BadRequest(new { message = ex.Message });
         }
     }
@@ -109,7 +97,7 @@ public class UserController : ControllerBase
     {
         try
         {
-            var user = await _userService.GetById(id);
+            var user = await userService.GetById(id);
             if (user == null)
                 return NotFound("User not found");
 
@@ -117,7 +105,7 @@ public class UserController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while fetching the user");
+            logger.LogError(ex, "An error occurred while fetching the user");
             return BadRequest(new { message = ex.Message });
         }
     }
@@ -132,7 +120,7 @@ public class UserController : ControllerBase
 
         try
         {
-            var user = await _userService.GetById(new Guid(userId));
+            var user = await userService.GetById(new Guid(userId));
             if (user == null)
                 return NotFound("User not found");
 
@@ -140,7 +128,7 @@ public class UserController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while fetching the current user");
+            logger.LogError(ex, "An error occurred while fetching the current user");
             return BadRequest(new { message = ex.Message });
         }
     }
@@ -156,17 +144,17 @@ public class UserController : ControllerBase
 
         try
         {
-            var user = await _userService.GetById(new Guid(userId));
+            var user = await userService.GetById(new Guid(userId));
             if (user == null)
                 return NotFound("User not found");
 
-            var result = await _tokenService.ConfirmRegistrationAsync(user.Id, token);
+            var result = await tokenService.ConfirmRegistrationAsync(user.Id, token);
 
             if (result)
             {
                 user.VerifiedEmail = true;
                 user.IsActive = true;
-                await _userService.Update(user);
+                await userService.Update(user);
 
                 return Ok("Email confirmed. You can now log in.");
             }
@@ -175,7 +163,7 @@ public class UserController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred during email confirmation");
+            logger.LogError(ex, "An error occurred during email confirmation");
             return BadRequest(new { message = ex.Message });
         }
     }
