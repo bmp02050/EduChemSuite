@@ -1,36 +1,45 @@
-﻿using EduChemSuite.API.Entities;
-using Microsoft.EntityFrameworkCore;
+using AutoMapper;
+using EduChemSuite.API.Dao;
+using EduChemSuite.API.Entities;
+using EduChemSuite.API.Models;
 
 namespace EduChemSuite.API.Services;
 
-public interface ISchoolService : IBaseService<School>
+public interface ISchoolService
 {
-    Task<IEnumerable<School>> List();
-    Task<School?> AddUserToSchool(UserSchool userSchool);
+    Task<SchoolModel?> GetById(Guid id);
+    Task<SchoolModel> Create(SchoolModel school);
+    Task<SchoolModel?> Update(SchoolModel school);
+    Task<IEnumerable<SchoolModel>> List();
+    Task<SchoolModel?> AddUserToSchool(UserSchoolModel userSchoolModel);
 }
 
-public class SchoolService(Context context)
-    : BaseService<School>(context), ISchoolService
+public class SchoolService(ISchoolRepository schoolRepository, IMapper mapper)
+    : ISchoolService
 {
-    private readonly Context _context = context;
-
-    public async Task<IEnumerable<School>> List()
+    public async Task<SchoolModel?> GetById(Guid id)
     {
-        return await _context.Schools.ToListAsync();
+        return mapper.Map<SchoolModel>(await schoolRepository.GetById(id));
     }
 
-    public async Task<School?> AddUserToSchool(UserSchool userSchool)
+    public async Task<SchoolModel> Create(SchoolModel school)
     {
-        var school = await _context.Schools.Include(school => school.UserSchools)
-            .FirstOrDefaultAsync(x => x.Id == userSchool.SchoolId);
-        
-        if (school != null && (school is { UserSchools: null } || school.UserSchools.Count == 0))
-            school.UserSchools = new List<UserSchool>();
-        
-        if (school is { UserSchools: not null } && school.UserSchools.All(x => x.SchoolId != userSchool.SchoolId))
-            school?.UserSchools?.Add(userSchool);
+        return mapper.Map<SchoolModel>(await schoolRepository.Create(mapper.Map<School>(school)));
+    }
 
-        await _context.SaveChangesAsync();
-        return school;
+    public async Task<SchoolModel?> Update(SchoolModel school)
+    {
+        return mapper.Map<SchoolModel>(await schoolRepository.Update(mapper.Map<School>(school)));
+    }
+
+    public async Task<IEnumerable<SchoolModel>> List()
+    {
+        return mapper.Map<IEnumerable<SchoolModel>>(await schoolRepository.List());
+    }
+
+    public async Task<SchoolModel?> AddUserToSchool(UserSchoolModel userSchoolModel)
+    {
+        var userSchool = mapper.Map<UserSchool>(userSchoolModel);
+        return mapper.Map<SchoolModel>(await schoolRepository.AddUserToSchool(userSchool));
     }
 }

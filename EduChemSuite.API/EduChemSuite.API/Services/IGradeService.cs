@@ -1,23 +1,38 @@
-﻿using EduChemSuite.API.Entities;
-using Microsoft.EntityFrameworkCore;
+using AutoMapper;
+using EduChemSuite.API.Dao;
+using EduChemSuite.API.Entities;
+using EduChemSuite.API.Models;
 
 namespace EduChemSuite.API.Services;
 
-public interface IGradeService : IBaseService<Grade>
+public interface IGradeService
 {
-    Task<IEnumerable<Grade?>> Find(Guid id);
+    Task<GradeModel?> GetById(Guid id);
+    Task<GradeModel> Create(GradeModel grade);
+    Task<GradeModel?> Update(GradeModel grade);
+    Task<IEnumerable<GradeModel?>> Find(Guid id);
 }
 
-public class GradeService(Context context) : BaseService<Grade>(context), IGradeService
+public class GradeService(IGradeRepository gradeRepository, IMapper mapper)
+    : IGradeService
 {
-    private readonly Context _context = context;
-    
-    public async Task<IEnumerable<Grade?>> Find(Guid id)
+    public async Task<GradeModel?> GetById(Guid id)
     {
-        return await _context.Grades.Where(
-                x => x.Id == id ||
-                     x.UserId == id ||
-                     x.ExamId == id)
-            .ToListAsync();
+        return mapper.Map<GradeModel>(await gradeRepository.GetById(id));
+    }
+
+    public async Task<GradeModel> Create(GradeModel grade)
+    {
+        return mapper.Map<GradeModel>(await gradeRepository.Create(mapper.Map<Grade>(grade)));
+    }
+
+    public async Task<GradeModel?> Update(GradeModel grade)
+    {
+        return mapper.Map<GradeModel>(await gradeRepository.Update(mapper.Map<Grade>(grade)));
+    }
+
+    public async Task<IEnumerable<GradeModel?>> Find(Guid id)
+    {
+        return mapper.Map<IEnumerable<GradeModel?>>(await gradeRepository.Find(id));
     }
 }

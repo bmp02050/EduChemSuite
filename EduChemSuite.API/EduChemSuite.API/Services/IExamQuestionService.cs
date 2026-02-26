@@ -1,22 +1,38 @@
-﻿using EduChemSuite.API.Entities;
-using Microsoft.EntityFrameworkCore;
+using AutoMapper;
+using EduChemSuite.API.Dao;
+using EduChemSuite.API.Entities;
+using EduChemSuite.API.Models;
 
 namespace EduChemSuite.API.Services;
 
-public interface IExamQuestionService : IBaseService<ExamQuestion>
+public interface IExamQuestionService
 {
-    Task<IEnumerable<ExamQuestion?>> Find(Guid id);
+    Task<ExamQuestionModel?> GetById(Guid id);
+    Task<ExamQuestionModel> Create(ExamQuestionModel examQuestion);
+    Task<ExamQuestionModel?> Update(ExamQuestionModel examQuestion);
+    Task<IEnumerable<ExamQuestionModel?>> Find(Guid id);
 }
 
-public class ExamQuestionService(Context context)
-    : BaseService<ExamQuestion>(context), IExamQuestionService
+public class ExamQuestionService(IExamQuestionRepository examQuestionRepository, IMapper mapper)
+    : IExamQuestionService
 {
-    private readonly Context _context = context;
-
-    public async Task<IEnumerable<ExamQuestion?>> Find(Guid id)
+    public async Task<ExamQuestionModel?> GetById(Guid id)
     {
-        return await _context.ExamQuestions
-            .Where(x => x.Id == id || x.QuestionId == id || x.ExamId == id)
-            .ToListAsync();
+        return mapper.Map<ExamQuestionModel>(await examQuestionRepository.GetById(id));
+    }
+
+    public async Task<ExamQuestionModel> Create(ExamQuestionModel examQuestion)
+    {
+        return mapper.Map<ExamQuestionModel>(await examQuestionRepository.Create(mapper.Map<ExamQuestion>(examQuestion)));
+    }
+
+    public async Task<ExamQuestionModel?> Update(ExamQuestionModel examQuestion)
+    {
+        return mapper.Map<ExamQuestionModel>(await examQuestionRepository.Update(mapper.Map<ExamQuestion>(examQuestion)));
+    }
+
+    public async Task<IEnumerable<ExamQuestionModel?>> Find(Guid id)
+    {
+        return mapper.Map<IEnumerable<ExamQuestionModel?>>(await examQuestionRepository.Find(id));
     }
 }

@@ -1,5 +1,3 @@
-using AutoMapper;
-using EduChemSuite.API.Entities;
 using EduChemSuite.API.Models;
 using EduChemSuite.API.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -11,9 +9,8 @@ namespace EduChemSuite.API.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 public class SchoolController(
-    ILogger<SchoolController> logger, 
-    ISchoolService schoolService, 
-    IMapper mapper) : Controller
+    ILogger<SchoolController> logger,
+    ISchoolService schoolService) : Controller
 {
     [HttpPost("")]
     public async Task<IActionResult> Upsert([FromBody] SchoolModel model)
@@ -22,22 +19,21 @@ public class SchoolController(
         {
             return BadRequest(ModelState);
         }
-        
+
         try
         {
-            var school = mapper.Map<School>(model);
-            School? result;
-            if (school.Id == Guid.Empty)
-                result = await schoolService.Create(school);
+            SchoolModel? result;
+            if (model.Id == Guid.Empty)
+                result = await schoolService.Create(model);
             else
-                result = await schoolService.Update(school);
+                result = await schoolService.Update(model);
 
-            return Ok(mapper.Map<SchoolModel>(result));
+            return Ok(result);
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "An error occurred during School creation");
-            
+
             return BadRequest(ex);
         }
     }
@@ -48,12 +44,12 @@ public class SchoolController(
         try
         {
             var result = await schoolService.List();
-            return Ok(mapper.Map<List<SchoolModel>>(result));
+            return Ok(result);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred during School creation");
-            
+            logger.LogError(ex, "An error occurred during School listing");
+
             return BadRequest(ex);
         }
     }

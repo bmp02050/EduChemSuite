@@ -1,25 +1,25 @@
-﻿using EduChemSuite.API.Entities;
-using Microsoft.EntityFrameworkCore;
+using AutoMapper;
+using EduChemSuite.API.Dao;
+using EduChemSuite.API.Models;
 
 namespace EduChemSuite.API.Services;
 
-public interface IUserSchoolService : IBaseService<UserSchool>
+public interface IUserSchoolService
 {
-    Task<IEnumerable<UserSchool>> GetBySchool(Guid schoolId);
-    Task<IEnumerable<UserSchool>> GetByUser(Guid userId);
+    Task<IEnumerable<UserSchoolModel>> GetBySchool(Guid schoolId);
+    Task<IEnumerable<UserSchoolModel>> GetByUser(Guid userId);
 }
-public class UserSchoolService(Context context) :  
-    BaseService<UserSchool>(context), IUserSchoolService
-{
-    private readonly Context _context = context;
 
-    public Task<IEnumerable<UserSchool>> GetBySchool(Guid schoolId)
+public class UserSchoolService(IUserSchoolRepository userSchoolRepository, IMapper mapper)
+    : IUserSchoolService
+{
+    public async Task<IEnumerable<UserSchoolModel>> GetBySchool(Guid schoolId)
     {
-        return Task.FromResult<IEnumerable<UserSchool>>(_context.UserSchools.Where(x => x.SchoolId == schoolId));
+        return mapper.Map<IEnumerable<UserSchoolModel>>(await userSchoolRepository.GetBySchool(schoolId));
     }
 
-    public Task<IEnumerable<UserSchool>> GetByUser(Guid userId)
+    public async Task<IEnumerable<UserSchoolModel>> GetByUser(Guid userId)
     {
-        return Task.FromResult<IEnumerable<UserSchool>>(_context.UserSchools.Where(x => x.UserId == userId));
+        return mapper.Map<IEnumerable<UserSchoolModel>>(await userSchoolRepository.GetByUser(userId));
     }
 }
