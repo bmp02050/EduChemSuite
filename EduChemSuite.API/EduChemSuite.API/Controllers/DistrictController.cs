@@ -28,8 +28,8 @@ public class DistrictController(
         model.IsActive ??= true;
         try
         {
-            var district = mapper.Map<District>(model);
-            District? result;
+            var district = mapper.Map<DistrictModel>(model);
+            DistrictModel? result;
             
             if (district.Id == Guid.Empty)
             {
@@ -83,7 +83,7 @@ public class DistrictController(
     }
 
     [HttpPost("Schools")]
-    public async Task<IActionResult> AddSchool([FromBody] DistrictSchools districtSchools)
+    public async Task<IActionResult> AddSchool([FromBody] DistrictSchoolsModel districtSchools)
     {
         try
         {

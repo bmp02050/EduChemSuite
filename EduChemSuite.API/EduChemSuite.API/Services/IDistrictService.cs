@@ -1,105 +1,59 @@
-﻿using EduChemSuite.API.Entities;
-using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using EduChemSuite.API.Dao;
+using EduChemSuite.API.Entities;
+using EduChemSuite.API.Models;
 
 namespace EduChemSuite.API.Services;
 
-public interface IDistrictService : IBaseService<District>
+public interface IDistrictService
 {
-    Task<IEnumerable<District>> List(Guid? userId);
-    Task<District?> AddUserToDistrict(Guid districtId, Guid userId);
-    Task<District?> AddSchoolToDistrict(DistrictSchools districtSchool);
+    Task<IEnumerable<DistrictModel>> List(Guid? userId);
+    Task<DistrictModel?> AddUserToDistrict(Guid districtId, Guid userId);
+    Task<DistrictModel?> AddSchoolToDistrict(DistrictSchoolsModel districtSchoolModel);
+    Task<DistrictModel?> GetById(Guid id);
+    Task<DistrictModel> Create(DistrictModel district);
+    Task<DistrictModel?> Update(DistrictModel district);
 }
 
-public class DistrictService(Context context)
-    : BaseService<District>(context), IDistrictService
+public class DistrictService(IDistrictRepository districtRepository, IMapper mapper, ILogger<DistrictService> logger)
+    : IDistrictService
 {
-    private readonly Context _context = context;
-
-    public new async Task<District?> GetById(Guid districtId)
+    public async Task<IEnumerable<DistrictModel>> List(Guid? userId)
     {
-        return await _context.Districts
-            .Include(d => d.Schools)
-            .ThenInclude(a => a.School)
-            .Include(d => d.Administrators)
-            .ThenInclude(a => a.User)
-            .FirstOrDefaultAsync(d => d.Id == districtId);
+        return mapper.Map<IEnumerable<DistrictModel>>(await districtRepository.List(userId));
     }
 
-    public new async Task<District> Create(District district)
+    public async Task<DistrictModel?> AddUserToDistrict(Guid districtId, Guid userId)
     {
-        var existingDistrict = await _context.Districts
-            .Include(d => d.Schools)
-            .ThenInclude(a => a.School)
-            .Include(d => d.Administrators)
-            .ThenInclude(a => a.User)
-            .FirstOrDefaultAsync(d => d.Id == district.Id);
-
-        if (existingDistrict != null)
+        var district = await districtRepository.AddUserToDistrict(districtId, userId);
+        if (district == null)
         {
-            // Update existing district
-            existingDistrict.DistrictName = district.DistrictName;
-
-            // Update Schools
-            existingDistrict.Schools = district.Schools;
-
-            // Update Administrators
-            existingDistrict.Administrators = district.Administrators;
-
-            _context.Districts.Update(existingDistrict);
-        }
-        else
-        {
-            // Create new district
-            await _context.Districts.AddAsync(district);
+            logger.LogError("District returned NULL");
+            return null;
         }
 
-        await _context.SaveChangesAsync();
-        return district;
+        return mapper.Map<DistrictModel>(district);
     }
 
-    public async Task<IEnumerable<District>> List(Guid? userId = null)
-    {
-        if (userId is null)
-            return await _context.Districts.ToListAsync();
 
-        return await _context.Districts
-            .Where(x => x.Administrators != null && x.Administrators.Any(y => y.UserId == userId))
-            .Include(d => d.Schools)
-            .ThenInclude(a => a.School)
-            .Include(d => d.Administrators)
-            .ThenInclude(a => a.User)
-            .ToListAsync();
+    public async Task<DistrictModel?> AddSchoolToDistrict(DistrictSchoolsModel districtSchoolModel)
+    {
+        var districtSchool = mapper.Map<DistrictSchools>(districtSchoolModel);
+        return mapper.Map<DistrictModel>(await districtRepository.AddSchoolToDistrict(districtSchool));
     }
 
-    public async Task<District?> AddUserToDistrict(Guid districtId, Guid userId)
+    public async Task<DistrictModel?> GetById(Guid id)
     {
-        var district = await _context.Districts.Include(district => district.Administrators)
-            .FirstOrDefaultAsync(x => x.Id == districtId);
-        if (district != null && (district is { Administrators: null } || district.Administrators.Count == 0))
-            district.Administrators = new List<UserDistrict>();
-        district?.Administrators?.Add(new UserDistrict()
-        {
-            DistrictId = districtId,
-            UserId = userId
-        });
-        await _context.SaveChangesAsync();
-        return district;
+        return mapper.Map<DistrictModel>(await districtRepository.GetById(id));
     }
 
-    public async Task<District?> AddSchoolToDistrict(DistrictSchools districtSchools)
+    public async Task<DistrictModel> Create(DistrictModel district)
     {
-        var district = await _context.Districts.Include(district => district.Schools)
-            .FirstOrDefaultAsync(x => x.Id == districtSchools.DistrictId);
+        return mapper.Map<DistrictModel>(await districtRepository.Create(mapper.Map<District>(district)));
+    }
 
-        if (district != null && (district is { Schools: null } || district.Schools.Count == 0))
-            district.Schools = new List<DistrictSchools>();
-
-        if (district is { Schools: not null } && 
-            district.Schools.All(x => x.SchoolId != districtSchools.SchoolId))
-        {
-            district.Schools.Add(districtSchools);
-            await _context.SaveChangesAsync();
-        }
-        return district;
+    public async Task<DistrictModel?> Update(DistrictModel district)
+    {
+        return mapper.Map<DistrictModel>(await districtRepository.Update(mapper.Map<District>(district)));
     }
 }
