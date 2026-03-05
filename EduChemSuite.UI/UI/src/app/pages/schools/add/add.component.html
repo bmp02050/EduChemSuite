@@ -1,0 +1,30 @@
+<div class="page-container-narrow">
+  <nz-card nzTitle="Add School">
+    <form nz-form [formGroup]="schoolForm" (ngSubmit)="onSubmit()" nzLayout="vertical">
+      <nz-form-item>
+        <nz-form-label nzRequired>School Name</nz-form-label>
+        <nz-form-control nzErrorTip="School name is required">
+          <input nz-input formControlName="name" placeholder="Enter school name" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label>District</nz-form-label>
+        <nz-form-control>
+          <nz-select formControlName="districtId" nzPlaceHolder="Select a district (optional)" nzAllowClear
+            [nzOptions]="districtOptions">
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-control>
+          <button nz-button nzType="primary" [nzLoading]="loading" type="submit" [disabled]="!schoolForm.valid">Create School</button>
+          <button nz-button type="button" routerLink="/schools" style="margin-left: 8px;">Cancel</button>
+        </nz-form-control>
+      </nz-form-item>
+
+      <alert></alert>
+    </form>
+  </nz-card>
+</div>

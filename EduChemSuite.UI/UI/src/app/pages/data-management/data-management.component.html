@@ -1,0 +1,80 @@
+<div class="page-container">
+  <nz-card nzTitle="Data Management">
+    <alert></alert>
+    <nz-tabs>
+      <!-- Import Tab -->
+      <nz-tab nzTitle="Import">
+        <div class="import-section">
+          <div class="import-controls">
+            <nz-select [(ngModel)]="importEntityType" style="width: 200px"
+              [nzOptions]="entityTypes">
+            </nz-select>
+
+            <button nz-button (click)="downloadTemplate()">
+              <span nz-icon nzType="download"></span> Download Template
+            </button>
+
+            <nz-upload [nzBeforeUpload]="beforeUpload" [nzAccept]="'.csv'">
+              <button nz-button nzType="primary" [nzLoading]="importLoading">
+                <span nz-icon nzType="upload"></span> Upload CSV
+              </button>
+            </nz-upload>
+          </div>
+
+          <nz-spin [nzSpinning]="importLoading">
+            @if (importResult) {
+              <div class="import-results">
+                <nz-alert
+                  [nzType]="importResult.errorCount === 0 ? 'success' : 'warning'"
+                  [nzMessage]="'Processed ' + importResult.totalRows + ' rows: ' + importResult.createdCount + ' created, ' + importResult.updatedCount + ' updated, ' + importResult.errorCount + ' errors'"
+                  nzShowIcon>
+                </nz-alert>
+                @if (importResult.errors.length > 0) {
+                  <div class="error-table">
+                    <h4>Errors</h4>
+                    <nz-table #errorTable [nzData]="importResult.errors" nzSize="small" [nzShowPagination]="importResult.errors.length > 10">
+                      <thead>
+                        <tr>
+                          <th>Row</th>
+                          <th>Data</th>
+                          <th>Error</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (error of errorTable.data; track error) {
+                          <tr>
+                            <td>{{ error.rowNumber }}</td>
+                            <td>{{ error.rawData }}</td>
+                            <td><nz-tag nzColor="red">{{ error.errorMessage }}</nz-tag></td>
+                          </tr>
+                        }
+                      </tbody>
+                    </nz-table>
+                  </div>
+                }
+              </div>
+            }
+          </nz-spin>
+        </div>
+      </nz-tab>
+
+      <!-- Export Tab -->
+      <nz-tab nzTitle="Export">
+        <div class="export-section">
+          <div class="export-controls">
+            <nz-select [(ngModel)]="exportEntityType" style="width: 200px"
+              [nzOptions]="exportEntityTypes">
+            </nz-select>
+          </div>
+
+          <nz-spin [nzSpinning]="exportLoading">
+            <app-search-filter
+              [showExportButton]="true"
+              (export)="onExport($event)">
+            </app-search-filter>
+          </nz-spin>
+        </div>
+      </nz-tab>
+    </nz-tabs>
+  </nz-card>
+</div>

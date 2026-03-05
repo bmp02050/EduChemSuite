@@ -1,0 +1,27 @@
+<div class="page-container-center">
+  @if (loading) {
+    <nz-spin nzTip="Verifying your email..."></nz-spin>
+  }
+
+  @if (!loading && success) {
+    <nz-result
+      nzStatus="success"
+      nzTitle="Email Confirmed!"
+      nzSubTitle="Your email has been verified. You can now log in to your account.">
+      <div nz-result-extra>
+        <button nz-button nzType="primary" routerLink="/account/login">Go to Login</button>
+      </div>
+    </nz-result>
+  }
+
+  @if (!loading && !success) {
+    <nz-result
+      nzStatus="error"
+      nzTitle="Confirmation Failed"
+      [nzSubTitle]="errorMessage">
+      <div nz-result-extra>
+        <button nz-button nzType="primary" routerLink="/account/login">Go to Login</button>
+      </div>
+    </nz-result>
+  }
+</div>

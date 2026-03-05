@@ -1,0 +1,12 @@
+**/bin/
+**/obj/
+**/node_modules/
+**/dist/
+**/.angular/
+**/cypress/videos/
+**/cypress/screenshots/
+**/.vs/
+**/.idea/
+**/*.user
+**/tmp/
+.git

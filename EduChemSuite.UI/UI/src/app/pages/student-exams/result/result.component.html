@@ -1,0 +1,187 @@
+<div class="page-container-wide">
+  <nz-spin [nzSpinning]="loading">
+    @if (result && !loading) {
+      <div>
+        <nz-card nzTitle="Exam Result">
+          <h2 style="margin-bottom: 4px;">{{ result.exam?.name }}</h2>
+          @if (result.exam?.description) {
+            <p style="color: #666;">{{ result.exam.description }}</p>
+          }
+          <!-- Grading in progress -->
+          @if (gradingPending) {
+            <div style="text-align: center; padding: 32px 0;">
+              <nz-spin nzSimple></nz-spin>
+              <p style="margin-top: 16px; color: #666;">Grading in progress... This page will update automatically.</p>
+            </div>
+          }
+          <!-- Grading failed -->
+          @if (gradingFailed) {
+            <nz-alert nzType="error" nzMessage="Grading failed. Please contact your instructor."
+            [nzShowIcon]="true" style="margin-top: 16px;"></nz-alert>
+          }
+          <!-- Grade stats (only when completed) -->
+          @if (!gradingPending && !gradingFailed) {
+            <div style="display: flex; gap: 32px; margin-top: 16px;">
+              <nz-statistic [nzValue]="result.grade?.gradeValue" nzTitle="Grade" nzSuffix="%"></nz-statistic>
+              <nz-statistic [nzValue]="result.correctAnswers" nzTitle="Correct" [nzSuffix]="'/ ' + result.totalQuestions"></nz-statistic>
+              @if (result.pendingReview > 0) {
+                <nz-statistic [nzValue]="result.pendingReview" nzTitle="Pending Review"></nz-statistic>
+              }
+            </div>
+          }
+        </nz-card>
+        @if (!gradingPending && !gradingFailed) {
+          <nz-card nzTitle="Response Details" class="mt-24">
+            <nz-table #responseTable [nzData]="result.responses || []" [nzShowPagination]="false" nzSize="small">
+              <thead>
+                <tr>
+                  <th>Question</th>
+                  <th>Your Answer</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (r of responseTable.data; track r) {
+                  <tr>
+                    <td>{{ r.question?.questionText }}</td>
+                    <td>
+                      <!-- Multiple Choice -->
+                      @if (r.answer) {
+                        <span>{{ r.answer.answerText }}</span>
+                      }
+                      @if (r.isGraded && !r.isCorrect && !isToolQuestion(r) && r.correctAnswerText) {
+                        <div style="margin-top: 4px; color: #52c41a; font-size: 12px;">
+                          Correct: {{ getCorrectAnswerText(r) }}
+                        </div>
+                      }
+                      <!-- Essay -->
+                      @if (r.responseText && !r.answer && !r.responseImage && !isToolQuestion(r)) {
+                        <span
+                        style="max-width: 400px; display: inline-block; white-space: pre-wrap; word-break: break-word;">{{ r.responseText }}</span>
+                      }
+                      <!-- Diagram: overlay comparison when incorrect -->
+                      @if (isDiagramQuestion(r) && r.isGraded && !r.isCorrect && r.responseText) {
+                        <div>
+                          <lib-molecule-compare
+                            [studentGraph]="r.responseText"
+                            [correctGraph]="getCorrectDiagramJson(r)"
+                            [width]="400" [height]="280">
+                          </lib-molecule-compare>
+                        </div>
+                      }
+                      <!-- Diagram: show image normally when correct or not yet graded -->
+                      @if (isDiagramQuestion(r) && (r.isCorrect || !r.isGraded) && r.responseImage) {
+                        <img
+                          [src]="r.responseImage"
+                          alt="Response drawing" style="max-width: 300px; max-height: 200px; border: 1px solid #d9d9d9; border-radius: 4px;" />
+                      }
+                      <!-- Atomic Structure: overlay comparison when incorrect -->
+                      @if (isAtomicStructureQuestion(r) && r.isGraded && !r.isCorrect && r.responseText) {
+                        <div>
+                          <lib-atom-compare
+                            [studentGraph]="r.responseText"
+                            [correctGraph]="getCorrectDiagramJson(r)"
+                            [width]="400" [height]="280">
+                          </lib-atom-compare>
+                        </div>
+                      }
+                      <!-- Atomic Structure: show image when correct or pending -->
+                      @if (isAtomicStructureQuestion(r) && (r.isCorrect || !r.isGraded) && r.responseImage) {
+                        <img
+                          [src]="r.responseImage"
+                          alt="Response drawing" style="max-width: 300px; max-height: 200px; border: 1px solid #d9d9d9; border-radius: 4px;" />
+                      }
+                      <!-- Lewis Structure: overlay comparison when incorrect -->
+                      @if (isLewisStructure(r) && r.isGraded && !r.isCorrect && r.responseText) {
+                        <div>
+                          <lib-molecule-compare
+                            [studentGraph]="r.responseText"
+                            [correctGraph]="getCorrectDiagramJson(r)"
+                            [width]="400" [height]="280">
+                          </lib-molecule-compare>
+                        </div>
+                      }
+                      @if (isLewisStructure(r) && (r.isCorrect || !r.isGraded) && r.responseImage) {
+                        <img
+                          [src]="r.responseImage"
+                          alt="Response drawing" style="max-width: 300px; max-height: 200px; border: 1px solid #d9d9d9; border-radius: 4px;" />
+                      }
+                      @if (isLewisStructure(r) && (r.isCorrect || !r.isGraded) && !r.responseImage && r.responseText) {
+                        <span style="color: #52c41a;">Response submitted</span>
+                      }
+                      <!-- Chemical Equation: compare when incorrect -->
+                      @if (isChemicalEquation(r) && r.isGraded && !r.isCorrect && r.responseText) {
+                        <div>
+                          <equation-compare
+                            [studentGraph]="r.responseText"
+                            [correctGraph]="getCorrectDiagramJson(r) ?? ''">
+                          </equation-compare>
+                        </div>
+                      }
+                      @if (isChemicalEquation(r) && (r.isCorrect || !r.isGraded) && r.responseText) {
+                        <span style="color: #52c41a;">Response submitted</span>
+                      }
+                      <!-- Electron Configuration: compare when incorrect -->
+                      @if (isElectronConfig(r) && r.isGraded && !r.isCorrect && r.responseText) {
+                        <div>
+                          <electron-config-compare
+                            [studentGraph]="r.responseText"
+                            [correctGraph]="getCorrectDiagramJson(r) ?? ''">
+                          </electron-config-compare>
+                        </div>
+                      }
+                      @if (isElectronConfig(r) && (r.isCorrect || !r.isGraded) && r.responseText) {
+                        <span style="color: #52c41a;">Response submitted</span>
+                      }
+                      <!-- Periodic Table Quiz: compare when incorrect -->
+                      @if (isPeriodicTable(r) && r.isGraded && !r.isCorrect && r.responseText) {
+                        <div>
+                          <periodic-table-compare
+                            [studentGraph]="r.responseText"
+                            [correctGraph]="getCorrectDiagramJson(r) ?? ''"
+                            [quizGraph]="getCorrectDiagramJson(r) ?? ''">
+                          </periodic-table-compare>
+                        </div>
+                      }
+                      @if (isPeriodicTable(r) && (r.isCorrect || !r.isGraded) && r.responseText) {
+                        <span style="color: #52c41a;">Response submitted</span>
+                      }
+                      <!-- Stoichiometry: compare when incorrect -->
+                      @if (isStoichiometry(r) && r.isGraded && !r.isCorrect && r.responseText) {
+                        <div>
+                          <stoichiometry-compare
+                            [studentGraph]="r.responseText"
+                            [correctGraph]="getCorrectDiagramJson(r) ?? ''">
+                          </stoichiometry-compare>
+                        </div>
+                      }
+                      @if (isStoichiometry(r) && (r.isCorrect || !r.isGraded) && r.responseText) {
+                        <span style="color: #52c41a;">Response submitted</span>
+                      }
+                      <!-- Non-tool image -->
+                      @if (!isToolQuestion(r) && r.responseImage && !r.answer && !r.responseText) {
+                        <img
+                          [src]="r.responseImage"
+                          alt="Response drawing" style="max-width: 300px; max-height: 200px; border: 1px solid #d9d9d9; border-radius: 4px;" />
+                      }
+                      <!-- No answer -->
+                      @if (!r.answer && !r.responseText && !r.responseImage) {
+                        <span style="color: #999;">No answer</span>
+                      }
+                    </td>
+                    <td>
+                      <nz-tag [nzColor]="getStatusColor(getResponseStatus(r))">{{ getResponseStatus(r) }}</nz-tag>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </nz-table>
+          </nz-card>
+        }
+        <div style="margin-top: 16px;">
+          <button nz-button nzType="primary" routerLink="/student-exams">Back to My Exams</button>
+        </div>
+      </div>
+    }
+  </nz-spin>
+</div>

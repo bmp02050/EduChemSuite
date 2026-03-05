@@ -1,0 +1,35 @@
+<div class="page-container">
+  <nz-card [nzTitle]="messages.length > 0 ? messages[0].subject : 'Conversation'" [nzExtra]="convExtra">
+    <nz-list [nzLoading]="loading">
+      @for (msg of messages; track msg) {
+        <nz-list-item [class.own-message]="isOwnMessage(msg)">
+          <div class="message-bubble" [class.sent]="isOwnMessage(msg)" [class.received]="!isOwnMessage(msg)">
+            <div class="message-header">
+              <strong>{{ msg.senderName }}</strong>
+              <nz-tag [nzColor]="'blue'" class="role-tag">{{ msg.senderAccountType }}</nz-tag>
+              <span class="message-date">{{ msg.createdAt | date:'short' }}</span>
+            </div>
+            <div class="message-body">{{ msg.body }}</div>
+          </div>
+        </nz-list-item>
+      }
+    </nz-list>
+
+    <nz-divider nzText="Reply"></nz-divider>
+
+    <div class="reply-form">
+      <textarea nz-input [(ngModel)]="replyBody" placeholder="Type your reply..."
+      [nzAutosize]="{ minRows: 3, maxRows: 8 }"></textarea>
+      <button nz-button nzType="primary" [nzLoading]="sending" [disabled]="sending || !replyBody.trim()"
+        (click)="sendReply()" class="reply-btn">
+        <span nz-icon nzType="send"></span> Send Reply
+      </button>
+    </div>
+  </nz-card>
+</div>
+
+<ng-template #convExtra>
+  <a routerLink="/messages" nz-button nzSize="small">
+    <span nz-icon nzType="inbox"></span> Back to Inbox
+  </a>
+</ng-template>

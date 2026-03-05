@@ -1,0 +1,21 @@
+<div class="page-container-narrow">
+  <nz-card nzTitle="Add District">
+    <form nz-form [formGroup]="upsertDistrictForm" (ngSubmit)="onSubmit()" nzLayout="vertical">
+      <nz-form-item>
+        <nz-form-label nzRequired>District Name</nz-form-label>
+        <nz-form-control nzErrorTip="District name is required">
+          <input nz-input formControlName="districtName" placeholder="Enter district name" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-control>
+          <button nz-button nzType="primary" [nzLoading]="loading" type="submit" [disabled]="!upsertDistrictForm.valid">Create District</button>
+          <button nz-button type="button" routerLink="/districts" style="margin-left: 8px;">Cancel</button>
+        </nz-form-control>
+      </nz-form-item>
+
+      <alert></alert>
+    </form>
+  </nz-card>
+</div>

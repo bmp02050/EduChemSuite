@@ -1,0 +1,97 @@
+<div class="page-container">
+  <nz-card [nzTitle]="pageTitle" [nzExtra]="extraTpl">
+    <div class="mb-16" style="display: flex; gap: 12px;">
+      <nz-select
+        [(ngModel)]="selectedDistrictId"
+        (ngModelChange)="onDistrictChange($event)"
+        nzPlaceHolder="Select a district"
+        nzAllowClear
+        [nzLoading]="loadingDistricts"
+        style="width: 300px;"
+        [nzOptions]="districtOptions">
+      </nz-select>
+      <nz-select
+        [(ngModel)]="selectedAccountType"
+        (ngModelChange)="onAccountTypeChange()"
+        nzPlaceHolder="Filter by account type"
+        nzAllowClear
+        style="width: 200px;"
+        [nzOptions]="accountTypeOptions">
+      </nz-select>
+    </div>
+
+    @if (!loadingUsers && users.length > 0) {
+      <div nz-row [nzGutter]="[16, 16]" class="mb-24">
+        <div nz-col [nzXs]="12" [nzMd]="6">
+          <nz-card class="stat-card"><nz-statistic [nzValue]="stats.total" nzTitle="Total Users"></nz-statistic></nz-card>
+        </div>
+        <div nz-col [nzXs]="12" [nzMd]="6">
+          <nz-card class="stat-card"><nz-statistic [nzValue]="stats.admins" nzTitle="Admins"></nz-statistic></nz-card>
+        </div>
+        <div nz-col [nzXs]="12" [nzMd]="6">
+          <nz-card class="stat-card"><nz-statistic [nzValue]="stats.staff" nzTitle="Staff"></nz-statistic></nz-card>
+        </div>
+        <div nz-col [nzXs]="12" [nzMd]="6">
+          <nz-card class="stat-card"><nz-statistic [nzValue]="stats.students" nzTitle="Students"></nz-statistic></nz-card>
+        </div>
+      </div>
+    }
+
+    <nz-spin [nzSpinning]="loadingUsers">
+      @if (!loadingUsers && selectedDistrictId && users.length === 0) {
+        <nz-empty nzNotFoundContent="No users found for this district"></nz-empty>
+      }
+      @if (users.length > 0) {
+        <nz-table #userTable [nzData]="users" [nzShowPagination]="users.length > 10" nzSize="small" [nzScroll]="{ x: '900px' }">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Account Type</th>
+              <th>Schools</th>
+              <th>Verified</th>
+              <th>Active</th>
+              <th nzWidth="90px">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (user of userTable.data; track user) {
+              <tr>
+                <td>{{ user.firstName }} {{ user.lastName }}</td>
+                <td>{{ user.email }}</td>
+                <td>
+                  <nz-tag nzColor="blue">{{ getAccountTypeLabel(user.accountType) }}</nz-tag>
+                </td>
+                <td>
+                  @for (us of user.userSchools || []; track us) {
+                    <nz-tag nzColor="geekblue">
+                      {{ us.school?.name || us.schoolId }}
+                    </nz-tag>
+                  }
+                </td>
+                <td>
+                  <nz-tag [nzColor]="user.verifiedEmail ? 'green' : 'red'">{{ user.verifiedEmail ? 'Yes' : 'No' }}</nz-tag>
+                </td>
+                <td>
+                  <nz-tag [nzColor]="user.isActive ? 'green' : 'default'">{{ user.isActive ? 'Yes' : 'No' }}</nz-tag>
+                </td>
+                <td>
+                  <a nz-button nzType="text" nzSize="small" [routerLink]="['/users/edit', user.id]" nz-tooltip nzTooltipTitle="Edit">
+                    <span nz-icon nzType="edit"></span>
+                  </a>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </nz-table>
+      }
+    </nz-spin>
+
+    @if (!loadingUsers && !selectedDistrictId) {
+      <nz-empty nzNotFoundContent="Select a district to view users"></nz-empty>
+    }
+  </nz-card>
+  <ng-template #extraTpl>
+    <button nz-button nzType="primary" routerLink="/account/register">Register New User</button>
+  </ng-template>
+</div>

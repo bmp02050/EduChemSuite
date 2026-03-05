@@ -1,0 +1,71 @@
+<div class="search-filter-container">
+  <div nz-row [nzGutter]="[16, 16]">
+    @if (showSearchText) {
+      <div nz-col [nzSpan]="8" [nzXs]="24" [nzSm]="12">
+        <nz-input-group nzPrefixIcon="search">
+          <input nz-input placeholder="Search..." [(ngModel)]="searchText" (keyup.enter)="onSearch()"/>
+        </nz-input-group>
+      </div>
+    }
+
+    @if (showDistrict) {
+      <div nz-col [nzSpan]="8" [nzXs]="24" [nzSm]="12">
+        <nz-select [(ngModel)]="districtId" nzPlaceHolder="All Districts" nzAllowClear style="width: 100%"
+          [nzOptions]="districtOptions">
+        </nz-select>
+      </div>
+    }
+
+    @if (showSchool) {
+      <div nz-col [nzSpan]="8" [nzXs]="24" [nzSm]="12">
+        <nz-select [(ngModel)]="schoolId" nzPlaceHolder="All Schools" nzAllowClear style="width: 100%"
+          [nzOptions]="schoolOptions">
+        </nz-select>
+      </div>
+    }
+
+    @if (showAccountType) {
+      <div nz-col [nzSpan]="8" [nzXs]="24" [nzSm]="12">
+        <nz-select [(ngModel)]="accountType" nzPlaceHolder="All Account Types" nzAllowClear style="width: 100%"
+          [nzOptions]="accountTypeOptionsList">
+        </nz-select>
+      </div>
+    }
+
+    @if (showDateRange) {
+      <div nz-col [nzSpan]="8" [nzXs]="24" [nzSm]="12">
+        <nz-range-picker [(ngModel)]="dateRange" style="width: 100%"></nz-range-picker>
+      </div>
+    }
+
+    @if (showGradeRange) {
+      <div nz-col [nzSpan]="4" [nzXs]="24" [nzSm]="12">
+        <nz-input-number [(ngModel)]="gradeMin" [nzMin]="0" [nzMax]="100" nzPlaceHolder="Min Grade" style="width: 100%"></nz-input-number>
+      </div>
+    }
+
+    @if (showGradeRange) {
+      <div nz-col [nzSpan]="4" [nzXs]="24" [nzSm]="12">
+        <nz-input-number [(ngModel)]="gradeMax" [nzMin]="0" [nzMax]="100" nzPlaceHolder="Max Grade" style="width: 100%"></nz-input-number>
+      </div>
+    }
+
+    @if (showIncludeInactive) {
+      <div nz-col [nzSpan]="4" [nzXs]="24" [nzSm]="12">
+        <label nz-checkbox [(ngModel)]="includeInactive">Include Inactive</label>
+      </div>
+    }
+  </div>
+
+  <div class="search-actions">
+    <button nz-button nzType="primary" (click)="onSearch()">
+      <span nz-icon nzType="search"></span> Search
+    </button>
+    <button nz-button (click)="onReset()">Reset</button>
+    @if (showExportButton) {
+      <button nz-button nzType="default" (click)="onExport()">
+        <span nz-icon nzType="download"></span> Export CSV
+      </button>
+    }
+  </div>
+</div>

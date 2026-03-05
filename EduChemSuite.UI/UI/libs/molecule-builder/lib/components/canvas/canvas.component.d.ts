@@ -1,0 +1,34 @@
+import { ElementRef, AfterViewInit, OnDestroy, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
+import { MoleculeBuilderService } from '../../molecule-builder.service';
+import * as i0 from "@angular/core";
+export declare class CanvasComponent implements AfterViewInit, OnDestroy, OnChanges {
+    private service;
+    containerRef: ElementRef<HTMLDivElement>;
+    width: number;
+    height: number;
+    readOnly: boolean;
+    changed: EventEmitter<void>;
+    private stage;
+    private atomLayer;
+    private bondLayer;
+    private tempLayer;
+    private subs;
+    private bondStartAtomId;
+    private tempLine;
+    constructor(service: MoleculeBuilderService);
+    ngAfterViewInit(): void;
+    ngOnChanges(changes: SimpleChanges): void;
+    ngOnDestroy(): void;
+    exportImage(): string;
+    private initStage;
+    private subscribeToState;
+    private bindStageEvents;
+    private handleStageClick;
+    private renderAtoms;
+    private bindAtomEvents;
+    private clearTempBond;
+    private renderBonds;
+    private getBondLines;
+    static ɵfac: i0.ɵɵFactoryDeclaration<CanvasComponent, never>;
+    static ɵcmp: i0.ɵɵComponentDeclaration<CanvasComponent, "lib-canvas", never, { "width": { "alias": "width"; "required": false; }; "height": { "alias": "height"; "required": false; }; "readOnly": { "alias": "readOnly"; "required": false; }; }, { "changed": "changed"; }, never, never, true, never>;
+}

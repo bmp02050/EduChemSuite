@@ -1,0 +1,234 @@
+<div class="page-container-wide">
+  <alert></alert>
+  <nz-card nzTitle="Edit Question">
+    <nz-spin [nzSpinning]="loading">
+      @if (question) {
+        <form nz-form [formGroup]="questionForm" (ngSubmit)="onSubmit()" nzLayout="vertical">
+          <nz-form-item>
+            <nz-form-label nzRequired>Question Text</nz-form-label>
+            <nz-form-control nzErrorTip="Question text is required">
+              <textarea nz-input formControlName="questionText" placeholder="Enter question text" rows="4"></textarea>
+            </nz-form-control>
+          </nz-form-item>
+          <nz-form-item>
+            <nz-form-label nzRequired>Question Type</nz-form-label>
+            <nz-form-control nzErrorTip="Question type is required">
+              <nz-select formControlName="questionTypeId" nzPlaceHolder="Select a question type"
+                [nzOptions]="questionTypeOptions">
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+          <nz-form-item>
+            <nz-form-label>Version</nz-form-label>
+            <nz-form-control>
+              <span>{{ question.version }}</span>
+            </nz-form-control>
+          </nz-form-item>
+          <button nz-button nzType="primary" type="submit" [disabled]="!questionForm.valid">Save Changes</button>
+          <button nz-button type="button" routerLink="/questions" style="margin-left: 8px;">Cancel</button>
+        </form>
+      }
+    </nz-spin>
+  </nz-card>
+
+  @if (question) {
+    <nz-card nzTitle="Tags" class="mt-24">
+      <div>
+        @for (qt of questionTags; track qt) {
+          <nz-tag nzColor="blue" nzMode="closeable" (nzOnClose)="removeTag(qt.id!)">
+            {{ qt.tag?.tagText }}
+          </nz-tag>
+        }
+      </div>
+      <div style="margin-top: 12px; display: flex; gap: 8px; align-items: center;">
+        <nz-select [(ngModel)]="selectedTagId" nzPlaceHolder="Select a tag" style="width: 200px;"
+          [nzOptions]="tagOptionsList">
+        </nz-select>
+        <button nz-button nzType="primary" type="button" (click)="addTag()" [disabled]="!selectedTagId">Add Tag</button>
+      </div>
+    </nz-card>
+  }
+
+  <!-- Molecule Editor for Chemical Structure Drawing -->
+  @if (question && isChemicalStructure()) {
+    <nz-card nzTitle="Correct Molecular Structure" class="mt-24">
+      @if (savedStructures.length > 0) {
+        <div style="margin-bottom: 16px; display: flex; gap: 8px; align-items: center;">
+          <nz-select [(ngModel)]="selectedStructureId"
+            nzPlaceHolder="Load from structure library" style="width: 300px;"
+            nzShowSearch nzAllowClear [nzOptions]="structureOptions">
+          </nz-select>
+          <button nz-button nzType="default" type="button" (click)="loadFromLibrary()" [disabled]="!selectedStructureId">Load from Library</button>
+        </div>
+      }
+      <molecule-builder
+        [graph]="moleculeGraph"
+        [width]="800"
+        [height]="450"
+        (graphChange)="onMoleculeGraphChange($event)">
+      </molecule-builder>
+      <div style="margin-top: 16px;">
+        <button nz-button nzType="primary" type="button" (click)="saveGraph()"
+        [nzLoading]="savingStructure" [disabled]="!moleculeGraph">Save Structure</button>
+      </div>
+    </nz-card>
+  }
+
+  <!-- Lewis Dot Structure Editor -->
+  @if (question && isLewisStructure()) {
+    <nz-card nzTitle="Correct Lewis Dot Structure" class="mt-24">
+      <molecule-builder
+        [graph]="moleculeGraph"
+        [width]="800"
+        [height]="450"
+        (graphChange)="onMoleculeGraphChange($event)">
+      </molecule-builder>
+      <div style="margin-top: 16px;">
+        <button nz-button nzType="primary" type="button" (click)="saveGraph()"
+        [nzLoading]="savingStructure" [disabled]="!moleculeGraph">Save Structure</button>
+      </div>
+    </nz-card>
+  }
+
+  <!-- Atomic Structure Editor (Bohr Model) -->
+  @if (question && isAtomicStructure()) {
+    <nz-card nzTitle="Correct Atomic Structure (Bohr Model)" class="mt-24">
+      <atom-builder
+        [graph]="atomGraph"
+        [width]="800"
+        [height]="650"
+        (graphChange)="onAtomGraphChange($event)">
+      </atom-builder>
+      <div style="margin-top: 16px;">
+        <button nz-button nzType="primary" type="button" (click)="saveGraph()"
+        [nzLoading]="savingStructure" [disabled]="!atomGraph">Save Structure</button>
+      </div>
+    </nz-card>
+  }
+
+  <!-- Chemical Equation Balancer -->
+  @if (question && isChemicalEquation()) {
+    <nz-card nzTitle="Correct Balanced Equation" class="mt-24">
+      <equation-balancer
+        [graph]="equationGraph"
+        [showInput]="true"
+        [width]="800"
+        (graphChange)="onEquationGraphChange($event)">
+      </equation-balancer>
+      <div style="margin-top: 16px;">
+        <button nz-button nzType="primary" type="button" (click)="saveGraph()"
+        [nzLoading]="savingStructure" [disabled]="!equationGraph">Save Equation</button>
+      </div>
+    </nz-card>
+  }
+
+  <!-- Electron Configuration -->
+  @if (question && isElectronConfig()) {
+    <nz-card nzTitle="Correct Electron Configuration" class="mt-24">
+      <electron-config
+        [graph]="electronConfigGraph"
+        [showElementPicker]="true"
+        [width]="800"
+        (graphChange)="onElectronConfigGraphChange($event)">
+      </electron-config>
+      <div style="margin-top: 16px;">
+        <button nz-button nzType="primary" type="button" (click)="saveGraph()"
+        [nzLoading]="savingStructure" [disabled]="!electronConfigGraph">Save Configuration</button>
+      </div>
+    </nz-card>
+  }
+
+  <!-- Periodic Table Quiz -->
+  @if (question && isPeriodicTable()) {
+    <nz-card nzTitle="Periodic Table Quiz Configuration" class="mt-24">
+      <periodic-table-quiz
+        [graph]="periodicTableGraph"
+        [showConfig]="true"
+        [width]="850"
+        (graphChange)="onPeriodicTableGraphChange($event)">
+      </periodic-table-quiz>
+      <div style="margin-top: 16px;">
+        <button nz-button nzType="primary" type="button" (click)="saveGraph()"
+        [nzLoading]="savingStructure" [disabled]="!periodicTableGraph">Save Quiz</button>
+      </div>
+    </nz-card>
+  }
+
+  <!-- Stoichiometry Stepper -->
+  @if (question && isStoichiometry()) {
+    <nz-card nzTitle="Correct Stoichiometry Problem" class="mt-24">
+      <stoichiometry-stepper
+        [graph]="stoichiometryGraph"
+        [showConfig]="true"
+        [width]="850"
+        (graphChange)="onStoichiometryGraphChange($event)">
+      </stoichiometry-stepper>
+      <div style="margin-top: 16px;">
+        <button nz-button nzType="primary" type="button" (click)="saveGraph()"
+        [nzLoading]="savingStructure" [disabled]="!stoichiometryGraph">Save Problem</button>
+      </div>
+    </nz-card>
+  }
+
+  <!-- Suggested Answers (hidden for tool questions) -->
+  @if (question && !isToolQuestion() && suggestedAnswers.length > 0) {
+    <nz-card nzTitle="Suggested Answers" class="mt-24">
+      <p style="color: #666; margin-bottom: 12px;">Answers from other questions with similar tags. Click "Copy" to add one to this question.</p>
+      <nz-table #suggestedTable [nzData]="suggestedAnswers" [nzShowPagination]="false" nzSize="small">
+        <thead>
+          <tr>
+            <th>Answer Text</th>
+            <th>Correct?</th>
+            <th>Source Question</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (a of suggestedTable.data; track a) {
+            <tr>
+              <td>{{ a.answerText }}</td>
+              <td>{{ a.isCorrect ? 'Yes' : 'No' }}</td>
+              <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ a.question?.questionText }}</td>
+              <td>
+                <button nz-button nzType="link" (click)="copyAnswer(a)">Copy</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </nz-table>
+    </nz-card>
+  }
+
+  <!-- Answers (hidden for tool questions) -->
+  @if (question && !isToolQuestion()) {
+    <nz-card nzTitle="Answers" class="mt-24">
+      <nz-table #answerTable [nzData]="answers" [nzShowPagination]="false" nzSize="small">
+        <thead>
+          <tr>
+            <th>Answer Text</th>
+            <th>Correct?</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (a of answerTable.data; track a) {
+            <tr>
+              <td>{{ a.answerText }}</td>
+              <td>{{ a.isCorrect ? 'Yes' : 'No' }}</td>
+              <td>
+                <button nz-button nzType="link" nzDanger
+                  nz-popconfirm nzPopconfirmTitle="Remove this answer?"
+                (nzOnConfirm)="deleteAnswer(a.id!)">Remove</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </nz-table>
+      <div style="margin-top: 12px; display: flex; gap: 8px; align-items: center;">
+        <input nz-input placeholder="Answer text" [(ngModel)]="newAnswerText" style="max-width: 300px;" />
+        <label nz-checkbox [(ngModel)]="newAnswerIsCorrect">Correct</label>
+        <button nz-button nzType="default" type="button" (click)="addAnswer()" [disabled]="!newAnswerText.trim()">Add Answer</button>
+      </div>
+    </nz-card>
+  }
+</div>

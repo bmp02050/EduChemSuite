@@ -1,0 +1,37 @@
+import { Atom } from './models/atom.model';
+import { Bond, BondType } from './models/bond.model';
+import { MoleculeGraph } from './models/molecule-graph.model';
+import * as i0 from "@angular/core";
+export type InteractionMode = 'select' | 'placeAtom' | 'drawBond' | 'erase';
+export declare class MoleculeBuilderService {
+    private atoms$;
+    private bonds$;
+    private selectedElement$;
+    private selectedBondType$;
+    private mode$;
+    private selectedAtomId$;
+    private idCounter;
+    readonly atoms: import("rxjs").Observable<Atom[]>;
+    readonly bonds: import("rxjs").Observable<Bond[]>;
+    readonly selectedElement: import("rxjs").Observable<string>;
+    readonly selectedBondType: import("rxjs").Observable<BondType>;
+    readonly mode: import("rxjs").Observable<InteractionMode>;
+    readonly selectedAtomId: import("rxjs").Observable<string | null>;
+    private generateId;
+    getGraph(): MoleculeGraph;
+    loadGraph(graph: MoleculeGraph): void;
+    clear(): void;
+    setMode(mode: InteractionMode): void;
+    setSelectedElement(element: string): void;
+    setSelectedBondType(type: BondType): void;
+    selectAtom(atomId: string | null): void;
+    addAtom(x: number, y: number): Atom;
+    moveAtom(atomId: string, x: number, y: number): void;
+    removeAtom(atomId: string): void;
+    addBond(fromAtomId: string, toAtomId: string): Bond | null;
+    removeBond(bondId: string): void;
+    getAtomById(id: string): Atom | undefined;
+    get currentMode(): InteractionMode;
+    static ɵfac: i0.ɵɵFactoryDeclaration<MoleculeBuilderService, never>;
+    static ɵprov: i0.ɵɵInjectableDeclaration<MoleculeBuilderService>;
+}

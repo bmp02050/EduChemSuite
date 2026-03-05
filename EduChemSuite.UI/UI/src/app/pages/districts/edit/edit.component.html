@@ -1,0 +1,85 @@
+<div class="page-container-wide">
+  <nz-card nzTitle="Edit District">
+    <nz-spin [nzSpinning]="loading">
+      <alert></alert>
+      @if (district) {
+        <form nz-form [formGroup]="districtForm" (ngSubmit)="onSubmit()" nzLayout="vertical">
+          <nz-form-item>
+            <nz-form-label nzRequired>District Name</nz-form-label>
+            <nz-form-control nzErrorTip="District name is required">
+              <input nz-input formControlName="districtName" placeholder="Enter district name" />
+            </nz-form-control>
+          </nz-form-item>
+          <nz-form-item>
+            <nz-form-control>
+              <button nz-button nzType="primary" type="submit" [disabled]="!districtForm.valid">Save Changes</button>
+              <button nz-button type="button" routerLink="/districts" style="margin-left: 8px;">Cancel</button>
+            </nz-form-control>
+          </nz-form-item>
+        </form>
+      }
+    </nz-spin>
+  </nz-card>
+
+  @if (district) {
+    <nz-card nzTitle="Schools" class="mt-24">
+      <nz-table #schoolsTable [nzData]="district.schools || []" nzSize="small" [nzShowPagination]="false">
+        <thead>
+          <tr>
+            <th>School Name</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (ds of schoolsTable.data; track ds) {
+            <tr>
+              <td>{{ ds.school?.name || ds.schoolId }}</td>
+            </tr>
+          }
+        </tbody>
+      </nz-table>
+    </nz-card>
+  }
+
+  @if (district) {
+    <nz-card nzTitle="Administrators" class="mt-24" [nzExtra]="adminExtraTpl">
+      <div class="mb-16" style="display: flex; gap: 8px; align-items: center;">
+        <nz-select
+          [(ngModel)]="selectedUserId"
+          [ngModelOptions]="{standalone: true}"
+          nzPlaceHolder="Select a user to add"
+          nzShowSearch
+          nzAllowClear
+          style="width: 300px;"
+          [nzOptions]="userOptions">
+        </nz-select>
+        <button nz-button nzType="primary" (click)="addAdministrator()"
+          [disabled]="!selectedUserId || addingUser" [nzLoading]="addingUser">
+          Add Administrator
+        </button>
+      </div>
+      <nz-table #adminsTable [nzData]="district.administrators || []" nzSize="small" [nzShowPagination]="false">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (admin of adminsTable.data; track admin) {
+            <tr>
+              <td>{{ admin.user?.firstName }} {{ admin.user?.lastName }}</td>
+              <td>{{ admin.user?.email }}</td>
+              <td>
+                <a nz-popconfirm nzPopconfirmTitle="Remove this administrator?" (nzOnConfirm)="removeAdministrator(admin.user?.id!)">
+                  Remove
+                </a>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </nz-table>
+    </nz-card>
+  }
+  <ng-template #adminExtraTpl></ng-template>
+</div>

@@ -1,0 +1,75 @@
+<div class="page-container-center">
+  <div class="contact-wrapper">
+    <div class="contact-logo">
+      <img src="assets/logo.svg" alt="EduChem Suite" />
+    </div>
+
+    @if (submitted) {
+      <nz-result
+        nzStatus="success"
+        nzTitle="Message Sent!"
+        nzSubTitle="Thank you for reaching out. We'll get back to you soon.">
+        <div nz-result-extra>
+          <a routerLink="/account/login" nz-button nzType="primary">Back to Login</a>
+        </div>
+      </nz-result>
+    } @else {
+      <nz-card class="contact-card" nzTitle="Contact Us">
+        <form nz-form [formGroup]="form" (ngSubmit)="onSubmit()" nzLayout="vertical">
+          <!-- Honeypot — hidden from real users -->
+          <div style="position: absolute; left: -9999px;">
+            <input formControlName="website" tabindex="-1" autocomplete="off" />
+          </div>
+
+          <nz-form-item>
+            <nz-form-label nzRequired>Name</nz-form-label>
+            <nz-form-control nzErrorTip="Name is required">
+              <input nz-input formControlName="name" placeholder="Your name" />
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label nzRequired>Email</nz-form-label>
+            <nz-form-control nzErrorTip="A valid email is required">
+              <input nz-input formControlName="email" placeholder="Your email address" />
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label nzRequired>Subject</nz-form-label>
+            <nz-form-control nzErrorTip="Please select a subject">
+              <nz-select formControlName="subjectType" nzPlaceHolder="Select a subject">
+                <nz-option nzValue="General Inquiry" nzLabel="General Inquiry"></nz-option>
+                <nz-option nzValue="Request a Demo" nzLabel="Request a Demo"></nz-option>
+                <nz-option nzValue="Bug Report" nzLabel="Bug Report"></nz-option>
+                <nz-option nzValue="Feature Request" nzLabel="Feature Request"></nz-option>
+                <nz-option nzValue="Other" nzLabel="Other"></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label nzRequired>Message</nz-form-label>
+            <nz-form-control nzErrorTip="Message is required">
+              <textarea nz-input formControlName="message" placeholder="How can we help?" [nzAutosize]="{ minRows: 4, maxRows: 8 }"></textarea>
+            </nz-form-control>
+          </nz-form-item>
+
+          @if (errorMessage) {
+            <nz-alert nzType="error" [nzMessage]="errorMessage" nzShowIcon style="margin-bottom: 16px;"></nz-alert>
+          }
+
+          <nz-form-item>
+            <nz-form-control>
+              <button nz-button nzType="primary" nzBlock [nzLoading]="loading" type="submit">Send Message</button>
+            </nz-form-control>
+          </nz-form-item>
+
+          <div class="back-link">
+            <a routerLink="/account/login">Back to Login</a>
+          </div>
+        </form>
+      </nz-card>
+    }
+  </div>
+</div>

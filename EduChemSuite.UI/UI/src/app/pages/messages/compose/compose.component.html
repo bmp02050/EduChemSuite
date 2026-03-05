@@ -1,0 +1,40 @@
+<div class="page-container-narrow">
+  <nz-card nzTitle="Compose Message" [nzExtra]="composeExtra">
+    <nz-form-item>
+      <nz-form-label>To</nz-form-label>
+      <nz-form-control>
+        <nz-select [(ngModel)]="selectedRecipientIds"
+          nzMode="multiple"
+          nzPlaceHolder="Select recipients..."
+          nzShowSearch
+          style="width: 100%"
+          [nzOptions]="userOptions">
+        </nz-select>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label>Subject</nz-form-label>
+      <nz-form-control>
+        <input nz-input [(ngModel)]="subject" placeholder="Subject" />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label>Message</nz-form-label>
+      <nz-form-control>
+        <textarea nz-input [(ngModel)]="body" placeholder="Type your message..." [nzAutosize]="{ minRows: 6, maxRows: 12 }"></textarea>
+      </nz-form-control>
+    </nz-form-item>
+
+    <button nz-button nzType="primary" [nzLoading]="sending" [disabled]="sending" (click)="send()">
+      <span nz-icon nzType="send"></span> Send
+    </button>
+  </nz-card>
+</div>
+
+<ng-template #composeExtra>
+  <a routerLink="/messages" nz-button nzSize="small">
+    <span nz-icon nzType="inbox"></span> Inbox
+  </a>
+</ng-template>

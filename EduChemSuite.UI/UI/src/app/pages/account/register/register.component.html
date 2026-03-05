@@ -1,0 +1,169 @@
+<div class="page-container-wide">
+  <nz-card nzTitle="Register New User">
+    <alert></alert>
+
+    <form nz-form [formGroup]="form" (ngSubmit)="onSubmit()" nzLayout="vertical">
+      <div nz-row [nzGutter]="16">
+        <div nz-col [nzSpan]="12" [nzXs]="24">
+          <nz-form-item>
+            <nz-form-label nzRequired>First Name</nz-form-label>
+            <nz-form-control nzErrorTip="First name is required">
+              <input nz-input formControlName="firstName" placeholder="First Name" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="12" [nzXs]="24">
+          <nz-form-item>
+            <nz-form-label nzRequired>Last Name</nz-form-label>
+            <nz-form-control nzErrorTip="Last name is required">
+              <input nz-input formControlName="lastName" placeholder="Last Name" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+
+      <nz-form-item>
+        <nz-form-label nzRequired>Email</nz-form-label>
+        <nz-form-control nzErrorTip="Please enter a valid email">
+          <input nz-input formControlName="email" placeholder="Email" type="email" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <div nz-row [nzGutter]="16">
+        <div nz-col [nzSpan]="12" [nzXs]="24">
+          <nz-form-item>
+            <nz-form-label nzRequired>Password</nz-form-label>
+            <nz-form-control nzErrorTip="Password must be at least 6 characters">
+              <input nz-input formControlName="password" placeholder="Password" type="password" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="12" [nzXs]="24">
+          <nz-form-item>
+            <nz-form-label nzRequired>Confirm Password</nz-form-label>
+            <nz-form-control nzErrorTip="Confirm password is required">
+              <input nz-input formControlName="confirmPassword" placeholder="Confirm Password" type="password" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+
+      <div nz-row [nzGutter]="16">
+        <div nz-col [nzSpan]="8" [nzXs]="24">
+          <nz-form-item>
+            <nz-form-label nzRequired>Account Type</nz-form-label>
+            <nz-form-control nzErrorTip="Account type is required">
+              <nz-select formControlName="accountType" nzPlaceHolder="Select account type"
+                [nzOptions]="accountTypes">
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="4" [nzXs]="12">
+          <nz-form-item>
+            <nz-form-label>Admin</nz-form-label>
+            <nz-form-control>
+              <label nz-checkbox formControlName="isAdmin">Is Admin</label>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="6" [nzXs]="24">
+          <nz-form-item>
+            <nz-form-label>District</nz-form-label>
+            <nz-form-control>
+              <nz-select formControlName="districtId" nzPlaceHolder="Select district" nzAllowClear nzShowSearch
+                [nzOptions]="districtOptions">
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="6" [nzXs]="24">
+          <nz-form-item>
+            <nz-form-label>School</nz-form-label>
+            <nz-form-control>
+              <nz-select formControlName="schoolId" nzPlaceHolder="Select school" nzAllowClear nzShowSearch
+                [nzOptions]="schoolOptions">
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+
+      <nz-divider nzText="Address"></nz-divider>
+
+      <nz-form-item>
+        <nz-form-label nzRequired>Address Line 1</nz-form-label>
+        <nz-form-control nzErrorTip="Address is required">
+          <input nz-input formControlName="address1" placeholder="Address Line 1" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <div nz-row [nzGutter]="16">
+        <div nz-col [nzSpan]="12" [nzXs]="24">
+          <nz-form-item>
+            <nz-form-label>Address Line 2</nz-form-label>
+            <nz-form-control>
+              <input nz-input formControlName="address2" placeholder="Address Line 2" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="12" [nzXs]="24">
+          <nz-form-item>
+            <nz-form-label>Address Line 3</nz-form-label>
+            <nz-form-control>
+              <input nz-input formControlName="address3" placeholder="Address Line 3" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+
+      <div nz-row [nzGutter]="16">
+        <div nz-col [nzSpan]="6" [nzXs]="12">
+          <nz-form-item>
+            <nz-form-label nzRequired>City</nz-form-label>
+            <nz-form-control nzErrorTip="City is required">
+              <input nz-input formControlName="city" placeholder="City" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="6" [nzXs]="12">
+          <nz-form-item>
+            <nz-form-label nzRequired>State</nz-form-label>
+            <nz-form-control nzErrorTip="State is required">
+              <input nz-input formControlName="state" placeholder="State" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="6" [nzXs]="12">
+          <nz-form-item>
+            <nz-form-label nzRequired>Country</nz-form-label>
+            <nz-form-control nzErrorTip="Country is required">
+              <input nz-input formControlName="country" placeholder="Country" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="6" [nzXs]="12">
+          <nz-form-item>
+            <nz-form-label nzRequired>Zip</nz-form-label>
+            <nz-form-control nzErrorTip="Zip is required">
+              <input nz-input formControlName="zip" placeholder="Zip" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+
+      <nz-form-item>
+        <nz-form-label nzRequired>Phone</nz-form-label>
+        <nz-form-control nzErrorTip="Phone is required">
+          <input nz-input formControlName="phone" placeholder="Phone" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-control>
+          <button nz-button nzType="primary" [nzLoading]="loading" [disabled]="loading" type="submit">Register</button>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </nz-card>
+</div>

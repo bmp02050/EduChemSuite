@@ -1,0 +1,66 @@
+# Local development only. Production uses infrastructure/deploy/ (blue-green split).
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    image: ghcr.io/bmp02050/educhemsuite/api:latest
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      ConnectionStrings__dev: "host=postgres;Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};Database=${POSTGRES_DB};Port=5432;Include Error Detail=True;"
+      ASPNETCORE_ENVIRONMENT: Production
+      Jwt__Issuer: ${JWT_ISSUER}
+      Jwt__Audience: ${JWT_AUDIENCE}
+      Jwt__Key: ${JWT_KEY}
+      FrontendUrl: ${FRONTEND_URL}
+      EmailSettings__SmtpServer: ${EMAIL_SMTP_SERVER:-smtp.gmail.com}
+      EmailSettings__SmtpPort: ${EMAIL_SMTP_PORT:-587}
+      EmailSettings__SmtpUser: ${EMAIL_SMTP_USER:-}
+      EmailSettings__SmtpPassword: ${EMAIL_SMTP_PASSWORD:-}
+      EmailSettings__EnableSsl: ${EMAIL_ENABLE_SSL:-true}
+      Seq__Url: "http://seq:5341"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      seq:
+        condition: service_started
+
+  seq:
+    image: datalust/seq:latest
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "Y"
+      SEQ_FIRSTRUN_ADMINPASSWORDHASH: "${SEQ_ADMIN_PASSWORD_HASH:-}"
+    ports:
+      - "127.0.0.1:5341:5341"
+      - "8081:80"
+    volumes:
+      - seq-data:/data
+
+  ui:
+    image: ghcr.io/bmp02050/educhemsuite/ui:latest
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+
+volumes:
+  postgres-data:
+  seq-data:

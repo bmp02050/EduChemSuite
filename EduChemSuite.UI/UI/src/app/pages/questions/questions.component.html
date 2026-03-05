@@ -1,0 +1,160 @@
+<div class="page-container">
+  @if (toggleError) {
+    <nz-alert nzType="error" [nzMessage]="toggleError" nzCloseable nzShowIcon
+    (nzOnClose)="toggleError = null" style="margin-bottom: 16px;"></nz-alert>
+  }
+
+  @if (!loading && questions.length > 0) {
+    <div nz-row [nzGutter]="16" style="margin-bottom: 16px;">
+      <div nz-col [nzXs]="12" [nzSm]="6">
+        <nz-card class="stat-card">
+          <nz-statistic [nzValue]="stats.total" nzTitle="Total Questions"></nz-statistic>
+        </nz-card>
+      </div>
+      <div nz-col [nzXs]="12" [nzSm]="6">
+        <nz-card class="stat-card">
+          <nz-statistic [nzValue]="stats.types" nzTitle="Question Types"></nz-statistic>
+        </nz-card>
+      </div>
+      <div nz-col [nzXs]="12" [nzSm]="6">
+        <nz-card class="stat-card">
+          <nz-statistic [nzValue]="stats.withTags" nzTitle="With Tags"></nz-statistic>
+        </nz-card>
+      </div>
+      <div nz-col [nzXs]="12" [nzSm]="6">
+        <nz-card class="stat-card">
+          <nz-statistic [nzValue]="stats.active" nzTitle="Active"></nz-statistic>
+        </nz-card>
+      </div>
+    </div>
+  }
+
+  <nz-card nzTitle="Questions" [nzExtra]="extraTpl">
+    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+      <nz-switch [(ngModel)]="showOldVersions" (ngModelChange)="onShowOldVersionsChange()"></nz-switch>
+      <span>Show old versions</span>
+    </div>
+    <nz-spin [nzSpinning]="loading">
+      @if (!loading && questions.length === 0) {
+        <nz-empty nzNotFoundContent="No questions found"></nz-empty>
+      }
+      <nz-table #questionTable [nzData]="questions" [nzShowPagination]="questions.length > 10" nzSize="small" [nzScroll]="{ x: '900px' }">
+        <thead>
+          <tr>
+            <th nzWidth="40px"
+              [nzChecked]="allChecked"
+              [nzIndeterminate]="indeterminate"
+            (nzCheckedChange)="onAllChecked($event)"></th>
+            <th>Question Text</th>
+            <th>Type</th>
+            <th>Tags</th>
+            <th>Answers</th>
+            @if (showOldVersions) {
+              <th>Version</th>
+            }
+            @if (isElevatedUser && showOldVersions) {
+              <th>Active</th>
+            }
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (q of questionTable.data; track q) {
+            <tr>
+              <td [nzChecked]="selectedQuestionIds.has(q.id!)"
+              (nzCheckedChange)="onItemChecked(q.id!, $event)"></td>
+              <td>{{ truncate(q.questionText, 60) }}</td>
+              <td>{{ q.questionType?.description }}</td>
+              <td>
+                @for (qt of q.questionTags; track qt) {
+                  <nz-tag nzColor="blue">{{ qt.tag?.tagText }}</nz-tag>
+                }
+              </td>
+              <td>{{ q.answers?.length || 0 }}</td>
+              @if (showOldVersions) {
+                <td>{{ q.version }}</td>
+              }
+              @if (isElevatedUser && showOldVersions) {
+                <td>
+                  <nz-tag [nzColor]="q.isActive ? 'green' : 'red'">{{ q.isActive ? 'Active' : 'Inactive' }}</nz-tag>
+                </td>
+              }
+              <td>
+                <a nz-button nzType="text" nzSize="small" [routerLink]="['edit', q.id]" nz-tooltip nzTooltipTitle="Edit"><span nz-icon nzType="edit"></span></a>
+                @if (isElevatedUser) {
+                  <button nz-button nzType="text" nzSize="small"
+                    nz-popconfirm [nzPopconfirmTitle]="q.isActive ? 'Deactivate this question?' : 'Reactivate this question?'"
+                    (nzOnConfirm)="toggleActive(q)"
+                    nz-tooltip [nzTooltipTitle]="q.isActive ? 'Deactivate' : 'Activate'"><span nz-icon nzType="poweroff"></span></button>
+                }
+                <button nz-button nzType="text" nzDanger nzSize="small"
+                  nz-popconfirm nzPopconfirmTitle="Are you sure you want to delete this question?"
+                  (nzOnConfirm)="deleteQuestion(q.id!)"
+                  nz-tooltip nzTooltipTitle="Delete"><span nz-icon nzType="delete"></span></button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </nz-table>
+    </nz-spin>
+  </nz-card>
+  <ng-template #extraTpl>
+    <button nz-button nzType="primary" routerLink="add">Add Question</button>
+  </ng-template>
+
+  <!-- Floating "Add to Quiz" button -->
+  @if (selectedQuestionIds.size > 0) {
+    <button
+      class="floating-add-btn"
+      nz-button nzType="primary" nzSize="large" nzShape="round"
+      (click)="openAddToQuizModal()">
+      <span nz-icon nzType="plus" nzTheme="outline"></span>
+      Add {{ selectedQuestionIds.size }} to Quiz
+    </button>
+  }
+
+  <!-- Add to Quiz Modal -->
+  <nz-modal [(nzVisible)]="addToQuizVisible"
+    nzTitle="Add Questions to Quiz"
+    [nzOkText]="addToQuizMode === 'new' ? 'Create & Add' : 'Add to Quiz'"
+    [nzOkDisabled]="isAddToQuizDisabled"
+    [nzOkLoading]="addingToQuiz"
+    (nzOnOk)="confirmAddToQuiz()"
+    (nzOnCancel)="addToQuizVisible = false">
+    <ng-container *nzModalContent>
+      <nz-radio-group [(ngModel)]="addToQuizMode" style="margin-bottom: 16px; display: block;">
+        <label nz-radio nzValue="new">Create new exam</label>
+        <label nz-radio nzValue="existing">Add to existing exam</label>
+      </nz-radio-group>
+
+      <!-- New exam input -->
+      @if (addToQuizMode === 'new') {
+        <div style="margin-bottom: 8px;">
+          <label style="display: block; margin-bottom: 4px;">Exam Name</label>
+          <input nz-input placeholder="Enter exam name" [(ngModel)]="newExamName" />
+        </div>
+      }
+
+      <!-- Existing exam select -->
+      @if (addToQuizMode === 'existing') {
+        <div style="margin-bottom: 8px;">
+          <label style="display: block; margin-bottom: 4px;">Select Exam</label>
+          <nz-select [(ngModel)]="selectedExamId"
+            nzPlaceHolder="Choose an exam"
+            nzShowSearch
+            style="width: 100%;">
+            @for (exam of existingExams; track exam) {
+              <nz-option
+                [nzValue]="exam.id"
+              [nzLabel]="exam.name || 'Untitled'"></nz-option>
+            }
+          </nz-select>
+        </div>
+      }
+
+      <p style="color: #888; margin-top: 12px;">
+        {{ selectedQuestionIds.size }} question(s) selected
+      </p>
+    </ng-container>
+  </nz-modal>
+</div>

@@ -1,0 +1,236 @@
+<div class="page-container-wide">
+  <alert></alert>
+  <nz-spin [nzSpinning]="loading">
+
+    <!-- Taking the exam -->
+    @if (exam && !loading && !submitted) {
+      <div>
+        <!-- Header -->
+        <nz-card>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <h2 style="margin: 0;">{{ exam.name }}</h2>
+              <nz-tag nzColor="orange">PRACTICE</nz-tag>
+            </div>
+            <div style="text-align: right;">
+              @if (timeLimitMinutes) {
+                <div [style.color]="timeRemainingSeconds < 60 ? 'red' : '#333'"
+                  style="font-size: 24px; font-weight: bold;">
+                  {{ formattedTimeRemaining }}
+                </div>
+              }
+              <div style="color: #666;">{{ answeredCount }} / {{ questions.length }} answered</div>
+            </div>
+          </div>
+          <nz-progress [nzPercent]="progressPercent" nzSize="small" style="margin-top: 8px;"></nz-progress>
+        </nz-card>
+        <div style="display: flex; gap: 16px; margin-top: 16px;">
+          <!-- Question Navigation -->
+          <div style="min-width: 200px;">
+            <nz-card nzTitle="Questions" nzSize="small">
+              @for (q of questions; track q; let i = $index) {
+                <div
+                  (click)="goToQuestion(i)"
+                  [style.background]="i === currentQuestionIndex ? '#e6f7ff' : 'transparent'"
+                  [style.border-left]="isQuestionAnswered(i) ? '3px solid #52c41a' : '3px solid #d9d9d9'"
+                  style="padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #f0f0f0;">
+                  <span style="font-weight: 500;">Q{{ i + 1 }}</span>
+                  <span style="color: #999; margin-left: 8px; font-size: 12px;">{{ q.questionType?.description }}</span>
+                </div>
+              }
+            </nz-card>
+          </div>
+          <!-- Current Question -->
+          <div style="flex: 1;">
+            @if (currentQuestion) {
+              <nz-card [nzTitle]="'Question ' + (currentQuestionIndex + 1) + ' of ' + questions.length">
+                <div style="font-size: 16px; margin-bottom: 16px;">{{ currentQuestion.questionText }}</div>
+                <!-- Multiple Choice -->
+                @if (isQuestionType('multiple choice')) {
+                  <div>
+                    <nz-radio-group [ngModel]="currentResponse?.answerId" (ngModelChange)="selectAnswer($event)">
+                      @for (a of currentQuestion.answers; track a) {
+                        <label nz-radio [nzValue]="a.id"
+                          style="display: block; margin-bottom: 8px; padding: 8px; border: 1px solid #d9d9d9; border-radius: 4px;">
+                          {{ a.answerText }}
+                        </label>
+                      }
+                    </nz-radio-group>
+                  </div>
+                }
+                <!-- Essay -->
+                @if (isQuestionType('essay')) {
+                  <div>
+                    <textarea nz-input [ngModel]="currentResponse?.responseText"
+                      (ngModelChange)="updateResponseText($event)"
+                    placeholder="Write your answer here..." rows="8"></textarea>
+                  </div>
+                }
+                <!-- Chemical Structure Drawing / Diagram -->
+                @if (isMoleculeType() && moleculeReady) {
+                  <div #moleculeContainer>
+                    <molecule-builder
+                      [graph]="moleculeGraph"
+                      [width]="moleculeWidth"
+                      [height]="moleculeHeight"
+                      (graphChange)="onMoleculeGraphChange($event)">
+                    </molecule-builder>
+                  </div>
+                }
+                <!-- Lewis Dot Structure -->
+                @if (isLewisStructureType() && moleculeReady) {
+                  <div #moleculeContainer>
+                    <molecule-builder
+                      [graph]="moleculeGraph"
+                      [width]="moleculeWidth"
+                      [height]="moleculeHeight"
+                      (graphChange)="onMoleculeGraphChange($event)">
+                    </molecule-builder>
+                  </div>
+                }
+                <!-- Atomic Structure (Bohr Model) -->
+                @if (isAtomicStructureType() && moleculeReady) {
+                  <div>
+                    <atom-builder
+                      [graph]="atomGraph"
+                      [width]="moleculeWidth"
+                      [height]="moleculeHeight"
+                      (graphChange)="onAtomGraphChange($event)">
+                    </atom-builder>
+                  </div>
+                }
+                <!-- Chemical Equation Balancer -->
+                @if (isChemicalEquationType() && moleculeReady) {
+                  <div>
+                    <equation-balancer
+                      [graph]="equationGraph"
+                      [showInput]="false"
+                      [readOnly]="false"
+                      [width]="moleculeWidth"
+                      (graphChange)="onEquationGraphChange($event)">
+                    </equation-balancer>
+                  </div>
+                }
+                <!-- Electron Configuration -->
+                @if (isElectronConfigType() && moleculeReady) {
+                  <div>
+                    <electron-config
+                      [graph]="electronConfigGraph"
+                      [showElementPicker]="false"
+                      [readOnly]="false"
+                      [width]="moleculeWidth"
+                      (graphChange)="onElectronConfigGraphChange($event)">
+                    </electron-config>
+                  </div>
+                }
+                <!-- Periodic Table Quiz -->
+                @if (isPeriodicTableType() && moleculeReady) {
+                  <div>
+                    <periodic-table-quiz
+                      [graph]="periodicTableQuiz"
+                      [responseGraph]="periodicTableResponse"
+                      [readOnly]="false"
+                      [width]="moleculeWidth"
+                      (responseChange)="onPeriodicTableResponseChange($event)">
+                    </periodic-table-quiz>
+                  </div>
+                }
+                <!-- Stoichiometry Stepper -->
+                @if (isStoichiometryType() && moleculeReady) {
+                  <div>
+                    <stoichiometry-stepper
+                      [graph]="stoichiometryGraph"
+                      [showConfig]="false"
+                      [readOnly]="false"
+                      [width]="moleculeWidth"
+                      (graphChange)="onStoichiometryGraphChange($event)">
+                    </stoichiometry-stepper>
+                  </div>
+                }
+                <!-- Navigation -->
+                <div style="margin-top: 24px; display: flex; justify-content: space-between;">
+                  <button nz-button (click)="prevQuestion()" [disabled]="currentQuestionIndex === 0">Previous</button>
+                  @if (currentQuestionIndex < questions.length - 1) {
+                    <button
+                    nz-button nzType="primary" (click)="nextQuestion()">Next</button>
+                  }
+                  @if (currentQuestionIndex === questions.length - 1) {
+                    <button
+                      nz-button nzType="primary"
+                      nz-popconfirm nzPopconfirmTitle="Finish practice and see results?"
+                    (nzOnConfirm)="finishPractice()">Finish Practice</button>
+                  }
+                </div>
+              </nz-card>
+            }
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Results view -->
+    @if (submitted) {
+      <div>
+        <!-- Score Summary -->
+        <nz-card>
+          <div style="text-align: center; padding: 24px 0;">
+            <h2 style="margin-bottom: 4px;">Practice Results</h2>
+            <nz-tag nzColor="orange">PRACTICE — Not saved</nz-tag>
+            <div style="font-size: 48px; font-weight: bold; margin: 16px 0;"
+              [style.color]="scorePercent >= 70 ? '#52c41a' : scorePercent >= 50 ? '#faad14' : '#ff4d4f'">
+              {{ scorePercent }}%
+            </div>
+            <div style="color: #666; font-size: 16px;">
+              {{ correctCount }} / {{ totalQuestions - pendingCount }} correct
+              @if (pendingCount > 0) {
+                <span> &middot; {{ pendingCount }} pending review</span>
+              }
+            </div>
+          </div>
+        </nz-card>
+        <!-- Per-question breakdown -->
+        <nz-card nzTitle="Question Breakdown" class="mt-24">
+          <nz-table #resultTable [nzData]="results" [nzShowPagination]="false" nzSize="small">
+            <thead>
+              <tr>
+                <th style="width: 40px;">#</th>
+                <th>Question</th>
+                <th>Type</th>
+                <th>Your Answer</th>
+                <th>Correct Answer</th>
+                <th style="width: 100px;">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (r of resultTable.data; track r; let i = $index) {
+                <tr>
+                  <td>{{ i + 1 }}</td>
+                  <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ r.questionText }}</td>
+                  <td>{{ r.questionType }}</td>
+                  <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ r.yourAnswer }}</td>
+                  <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ r.correctAnswer }}</td>
+                  <td>
+                    @if (r.status === 'correct') {
+                      <nz-tag nzColor="green">Correct</nz-tag>
+                    }
+                    @if (r.status === 'incorrect') {
+                      <nz-tag nzColor="red">Incorrect</nz-tag>
+                    }
+                    @if (r.status === 'pending') {
+                      <nz-tag nzColor="orange">Pending Review</nz-tag>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </nz-table>
+        </nz-card>
+        <!-- Action buttons -->
+        <div style="margin-top: 24px; display: flex; gap: 8px;">
+          <button nz-button nzType="primary" (click)="retake()">Try Again</button>
+          <button nz-button [routerLink]="'/exams/edit/' + examId">Back to Edit</button>
+        </div>
+      </div>
+    }
+  </nz-spin>
+</div>

@@ -1,0 +1,67 @@
+<div class="page-container">
+  <nz-card nzTitle="Schools" [nzExtra]="extraTpl">
+
+    @if (!loading && schools.length > 0) {
+      <div nz-row [nzGutter]="[16, 16]" class="mb-24">
+        <div nz-col [nzXs]="12" [nzMd]="6">
+          <nz-card class="stat-card"><nz-statistic [nzValue]="stats.total" nzTitle="Total Schools"></nz-statistic></nz-card>
+        </div>
+        <div nz-col [nzXs]="12" [nzMd]="6">
+          <nz-card class="stat-card"><nz-statistic [nzValue]="stats.totalStaff" nzTitle="Total Staff"></nz-statistic></nz-card>
+        </div>
+        <div nz-col [nzXs]="12" [nzMd]="6">
+          <nz-card class="stat-card"><nz-statistic [nzValue]="stats.totalStudents" nzTitle="Total Students"></nz-statistic></nz-card>
+        </div>
+        <div nz-col [nzXs]="12" [nzMd]="6">
+          <nz-card class="stat-card"><nz-statistic [nzValue]="stats.active" nzTitle="Active"></nz-statistic></nz-card>
+        </div>
+      </div>
+    }
+
+    <nz-spin [nzSpinning]="loading">
+      @if (!loading && schools.length === 0) {
+        <nz-empty nzNotFoundContent="No schools found">
+          <button nz-button nzType="primary" routerLink="add">Add School</button>
+        </nz-empty>
+      }
+      @if (schools.length > 0) {
+        <nz-table #schoolTable [nzData]="schools" [nzShowPagination]="schools.length > 10" nzSize="small" [nzScroll]="{ x: '700px' }">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Staff</th>
+              <th>Students</th>
+              <th>Active</th>
+              <th nzWidth="90px">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (school of schoolTable.data; track school) {
+              <tr>
+                <td>{{ school.name }}</td>
+                <td>{{ school.staff?.length || 0 }}</td>
+                <td>{{ school.students?.length || 0 }}</td>
+                <td>
+                  <nz-tag [nzColor]="school.isActive ? 'green' : 'default'">{{ school.isActive ? 'Yes' : 'No' }}</nz-tag>
+                </td>
+                <td>
+                  <a nz-button nzType="text" nzSize="small" [routerLink]="['edit', school.id]" nz-tooltip nzTooltipTitle="Edit">
+                    <span nz-icon nzType="edit"></span>
+                  </a>
+                  <button nz-button nzType="text" nzDanger nzSize="small"
+                    nz-popconfirm nzPopconfirmTitle="Are you sure you want to delete this school?"
+                    (nzOnConfirm)="deleteSchool(school.id!)" nz-tooltip nzTooltipTitle="Delete">
+                    <span nz-icon nzType="delete"></span>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </nz-table>
+      }
+    </nz-spin>
+  </nz-card>
+  <ng-template #extraTpl>
+    <button nz-button nzType="primary" routerLink="add">Add School</button>
+  </ng-template>
+</div>

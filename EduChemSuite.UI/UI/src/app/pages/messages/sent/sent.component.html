@@ -1,0 +1,50 @@
+<div class="page-container">
+  <nz-card nzTitle="Sent Messages" [nzExtra]="sentExtra">
+    @if (!loading && messages.length > 0) {
+      <div nz-row [nzGutter]="16" style="margin-bottom: 16px;">
+        <div nz-col [nzXs]="24" [nzMd]="6">
+          <nz-card><nz-statistic [nzValue]="stats.total" nzTitle="Total Sent"></nz-statistic></nz-card>
+        </div>
+      </div>
+    }
+    <nz-table #sentTable [nzData]="messages" [nzLoading]="loading" nzSize="small"
+      [nzScroll]="{ x: '600px' }"
+      [nzShowPagination]="messages.length > 10" [nzPageSize]="10">
+      <thead>
+        <tr>
+          <th>To</th>
+          <th>Subject</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (msg of sentTable.data; track msg) {
+          <tr class="clickable-row">
+            <td>
+              <a [routerLink]="['/messages/conversation', msg.conversationId]">
+                {{ msg.recipientName }}
+              </a>
+              <nz-tag [nzColor]="'blue'" class="role-tag">{{ msg.recipientAccountType }}</nz-tag>
+            </td>
+            <td>
+              <a [routerLink]="['/messages/conversation', msg.conversationId]">{{ msg.subject }}</a>
+            </td>
+            <td>{{ msg.createdAt | date:'short' }}</td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+    @if (!loading && messages.length === 0) {
+      <nz-empty nzNotFoundContent="No sent messages"></nz-empty>
+    }
+  </nz-card>
+</div>
+
+<ng-template #sentExtra>
+  <a routerLink="/messages" nz-button nzSize="small">
+    <span nz-icon nzType="inbox"></span> Inbox
+  </a>
+  <a routerLink="/messages/compose" nz-button nzType="primary" nzSize="small" style="margin-left: 8px;">
+    <span nz-icon nzType="edit"></span> Compose
+  </a>
+</ng-template>

@@ -1,0 +1,212 @@
+<div class="page-container-wide">
+  <alert></alert>
+
+  <!-- Student List Card -->
+  @if (!selectedStudent) {
+    <nz-card nzTitle="Exam Review — Student Submissions"
+      [nzExtra]="backBtn">
+      <ng-template #backBtn>
+        <button nz-button nzType="default" [routerLink]="'/exams/edit/' + examId">Back to Exam</button>
+      </ng-template>
+      <nz-spin [nzSpinning]="loading">
+        @if (!loading && students.length === 0) {
+          <div>
+            <p style="color: #999;">No submissions yet.</p>
+          </div>
+        }
+        @if (students.length > 0) {
+          <nz-table #studentTable [nzData]="students" [nzShowPagination]="false" nzSize="small">
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Grade</th>
+                <th>Graded</th>
+                <th>Pending</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (s of studentTable.data; track s) {
+                <tr>
+                  <td>{{ s.user?.firstName }} {{ s.user?.lastName }}</td>
+                  <td>{{ s.grade }}%</td>
+                  <td>{{ s.gradedCount }} / {{ s.totalCount }}</td>
+                  <td>
+                    @if (s.pendingCount > 0) {
+                      <nz-tag nzColor="orange">{{ s.pendingCount }} pending</nz-tag>
+                    }
+                    @if (s.pendingCount === 0) {
+                      <nz-tag nzColor="green">All graded</nz-tag>
+                    }
+                  </td>
+                  <td>
+                    <button nz-button nzType="link" (click)="selectStudent(s)">Review</button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </nz-table>
+        }
+      </nz-spin>
+    </nz-card>
+  }
+
+  <!-- Response Review Card -->
+  @if (selectedStudent) {
+    <nz-card
+      [nzTitle]="'Responses — ' + (selectedStudent.user?.firstName || '') + ' ' + (selectedStudent.user?.lastName || '')"
+      [nzExtra]="reviewExtra">
+      <ng-template #reviewExtra>
+        <span style="margin-right: 16px;">
+          Grade: <strong>{{ selectedStudent.grade }}%</strong>
+          &nbsp;|&nbsp;
+          Correct: {{ selectedStudent.correctCount }} / {{ selectedStudent.totalCount }}
+          &nbsp;|&nbsp;
+          @if (selectedStudent.pendingCount > 0) {
+            <nz-tag nzColor="orange">{{ selectedStudent.pendingCount }} pending</nz-tag>
+          }
+          @if (selectedStudent.pendingCount === 0) {
+            <nz-tag nzColor="green">All graded</nz-tag>
+          }
+        </span>
+        <button nz-button nzType="default" (click)="backToList()">Back to Students</button>
+      </ng-template>
+      <nz-spin [nzSpinning]="grading">
+        <nz-table #responseTable [nzData]="selectedStudent.responses" [nzShowPagination]="false" nzSize="small">
+          <thead>
+            <tr>
+              <th>Question</th>
+              <th>Type</th>
+              <th>Student Answer</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (r of responseTable.data; track r) {
+              <tr>
+                <td>{{ r.question?.questionText }}</td>
+                <td>{{ r.question?.questionType?.description }}</td>
+                <td>
+                  @if (r.answer?.answerText) {
+                    <span>{{ r.answer.answerText }}</span>
+                  }
+                  <!-- Essay / plain text (non-tool types) -->
+                  @if (!r.answer?.answerText && r.responseText && !isToolQuestion(r)) {
+                    <span style="white-space: pre-wrap;">{{ r.responseText }}</span>
+                  }
+                  <!-- Diagram: overlay comparison -->
+                  @if (isDiagramQuestion(r) && r.responseText) {
+                    <div>
+                      <lib-molecule-compare
+                        [studentGraph]="r.responseText"
+                        [correctGraph]="getCorrectDiagramJson(r)"
+                        [width]="400" [height]="280">
+                      </lib-molecule-compare>
+                    </div>
+                  }
+                  <!-- Atomic Structure: overlay comparison -->
+                  @if (isAtomicStructureQuestion(r) && r.responseText) {
+                    <div>
+                      <lib-atom-compare
+                        [studentGraph]="r.responseText"
+                        [correctGraph]="getCorrectDiagramJson(r)"
+                        [width]="400" [height]="280">
+                      </lib-atom-compare>
+                    </div>
+                  }
+                  <!-- Diagram image fallback -->
+                  @if (isDiagramQuestion(r) && !r.responseText && r.responseImage) {
+                    <img
+                      [src]="r.responseImage" alt="Student response" style="max-width: 300px; max-height: 200px;" />
+                  }
+                  <!-- Atomic structure image fallback -->
+                  @if (isAtomicStructureQuestion(r) && !r.responseText && r.responseImage) {
+                    <img
+                      [src]="r.responseImage" alt="Student response" style="max-width: 300px; max-height: 200px;" />
+                  }
+                  <!-- Lewis Dot Structure: overlay comparison -->
+                  @if (isLewisStructure(r) && r.responseText) {
+                    <div>
+                      <lib-molecule-compare
+                        [studentGraph]="r.responseText"
+                        [correctGraph]="getCorrectDiagramJson(r)"
+                        [width]="400" [height]="280">
+                      </lib-molecule-compare>
+                    </div>
+                  }
+                  <!-- Lewis structure image fallback -->
+                  @if (isLewisStructure(r) && !r.responseText && r.responseImage) {
+                    <img
+                      [src]="r.responseImage" alt="Student response" style="max-width: 300px; max-height: 200px;" />
+                  }
+                  <!-- Chemical Equation: compare -->
+                  @if (isChemicalEquation(r) && r.responseText) {
+                    <div>
+                      <equation-compare
+                        [studentGraph]="r.responseText"
+                        [correctGraph]="getCorrectDiagramJson(r) ?? ''">
+                      </equation-compare>
+                    </div>
+                  }
+                  <!-- Electron Configuration: compare -->
+                  @if (isElectronConfig(r) && r.responseText) {
+                    <div>
+                      <electron-config-compare
+                        [studentGraph]="r.responseText"
+                        [correctGraph]="getCorrectDiagramJson(r) ?? ''">
+                      </electron-config-compare>
+                    </div>
+                  }
+                  <!-- Periodic Table Quiz: compare -->
+                  @if (isPeriodicTable(r) && r.responseText) {
+                    <div>
+                      <periodic-table-compare
+                        [studentGraph]="r.responseText"
+                        [correctGraph]="getCorrectDiagramJson(r) ?? ''"
+                        [quizGraph]="getCorrectDiagramJson(r) ?? ''">
+                      </periodic-table-compare>
+                    </div>
+                  }
+                  <!-- Stoichiometry: compare -->
+                  @if (isStoichiometry(r) && r.responseText) {
+                    <div>
+                      <stoichiometry-compare
+                        [studentGraph]="r.responseText"
+                        [correctGraph]="getCorrectDiagramJson(r) ?? ''">
+                      </stoichiometry-compare>
+                    </div>
+                  }
+                  <!-- Non-tool image -->
+                  @if (!isToolQuestion(r) && !r.answer?.answerText && !r.responseText && r.responseImage) {
+                    <img
+                      [src]="r.responseImage" alt="Student response" style="max-width: 300px; max-height: 200px;" />
+                  }
+                  @if (!r.answer?.answerText && !r.responseText && !r.responseImage) {
+                    <span style="color: #999;">[No Response]</span>
+                  }
+                </td>
+                <td>
+                  <nz-tag [nzColor]="getStatusColor(r)">{{ getStatusText(r) }}</nz-tag>
+                </td>
+                <td>
+                  @if (!r.isGraded) {
+                    <span>
+                      <button nz-button nzType="link" nz-popconfirm nzPopconfirmTitle="Mark this response as correct?"
+                      (nzOnConfirm)="gradeResponse(r.id, true)">Mark Correct</button>
+                      <button nz-button nzType="link" nzDanger nz-popconfirm nzPopconfirmTitle="Mark this response as incorrect?"
+                      (nzOnConfirm)="gradeResponse(r.id, false)">Mark Incorrect</button>
+                    </span>
+                  }
+                  @if (r.isGraded) {
+                    <span style="color: #999;">Graded</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </nz-table>
+      </nz-spin>
+    </nz-card>
+  }
+</div>

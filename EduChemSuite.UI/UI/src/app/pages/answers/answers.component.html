@@ -1,0 +1,43 @@
+<div class="page-container">
+  <nz-card nzTitle="Image Types">
+    <div style="margin-bottom: 16px; display: flex; gap: 8px; align-items: center;">
+      <input nz-input placeholder="New image type description" [(ngModel)]="newDescription" style="max-width: 300px;" />
+      <button nz-button nzType="primary" (click)="addType()" [disabled]="!newDescription.trim()">Add Type</button>
+    </div>
+    <nz-spin [nzSpinning]="loading">
+      <nz-table #typeTable [nzData]="imageTypes" [nzShowPagination]="imageTypes.length > 10" nzSize="middle">
+        <thead>
+          <tr>
+            <th>Description</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (it of typeTable.data; track it) {
+            <tr>
+              <td>
+                @if (editingId !== it.id) {
+                  <span>{{ it.description }}</span>
+                }
+                @if (editingId === it.id) {
+                  <input nz-input [(ngModel)]="editDescription" />
+                }
+              </td>
+              <td>
+                @if (editingId !== it.id) {
+                  <button nz-button nzType="link" (click)="startEdit(it)">Edit</button>
+                }
+                @if (editingId === it.id) {
+                  <button nz-button nzType="link" (click)="saveEdit(it)">Save</button>
+                }
+                @if (editingId === it.id) {
+                  <button nz-button nzType="link" (click)="cancelEdit()">Cancel</button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </nz-table>
+    </nz-spin>
+  </nz-card>
+</div>

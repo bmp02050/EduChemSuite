@@ -1,0 +1,719 @@
+<nz-layout class="kb-layout">
+  <nz-sider class="kb-sider" [nzWidth]="220" nzBreakpoint="md" [nzCollapsedWidth]="0">
+    <ul nz-menu nzMode="inline">
+      @for (page of visiblePages; track page.key) {
+        <li nz-menu-item [nzSelected]="activePage === page.key" (click)="selectPage(page.key)">
+          <span nz-icon [nzType]="page.icon" nzTheme="outline"></span>
+          <span>{{ page.title }}</span>
+        </li>
+      }
+    </ul>
+  </nz-sider>
+
+  <nz-content class="kb-content">
+
+    <!-- HOME -->
+    @if (activePage === 'home') {
+      <h1>EduChemSuite Knowledge Base</h1>
+      <p>Welcome to the EduChemSuite documentation! EduChemSuite is a chemistry education platform that helps teachers create and manage exams, students take assessments, and administrators oversee districts and schools.</p>
+
+      <h2>Quick Links</h2>
+      <div class="quick-links">
+        <a (click)="selectPage('getting-started')">Getting Started</a> &middot;
+        <a (click)="selectPage('for-teachers')">For Teachers</a> &middot;
+        <a (click)="selectPage('for-students')">For Students</a> &middot;
+        <a (click)="selectPage('for-administrators')">For Administrators</a> &middot;
+        <a (click)="selectPage('data-management')">Data Management</a> &middot;
+        <a (click)="selectPage('messaging')">Messaging</a> &middot;
+        <a (click)="selectPage('faq')">FAQ</a>
+      </div>
+
+      <h2>Platform Overview</h2>
+      <nz-table [nzData]="['_']" [nzShowPagination]="false" nzSize="small" nzBordered>
+        <thead>
+          <tr><th>Role</th><th>What you can do</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Administrator</strong></td><td>Manage districts, schools, users, and invitations. Full access to all data within your scope.</td></tr>
+          <tr><td><strong>Staff (Teacher)</strong></td><td>Create questions using interactive chemistry tools (molecule editor, Bohr models, equation balancer, and more), build exams, review student responses, and assign grades.</td></tr>
+          <tr><td><strong>Student</strong></td><td>View assigned exams, take assessments with interactive chemistry tools, and review your grades and results.</td></tr>
+        </tbody>
+      </nz-table>
+
+      <p>If you can't find the answer you're looking for, check the <a (click)="selectPage('faq')">FAQ</a> page or reach out to your school administrator.</p>
+    }
+
+    <!-- GETTING STARTED -->
+    @if (activePage === 'getting-started') {
+      <h1>Getting Started</h1>
+
+      <h2>Logging In</h2>
+      <ol>
+        <li>Navigate to your EduChemSuite instance URL.</li>
+        <li>Enter your <strong>email</strong> and <strong>password</strong>.</li>
+        <li>Click <strong>Log In</strong>.</li>
+      </ol>
+      <p>If you don't have an account, ask your administrator for a <strong>registration invite link</strong>.</p>
+
+      <h2>First-Time Setup</h2>
+      <p>After your first login, complete your profile:</p>
+      <ol>
+        <li>Click <strong>Account &gt; Profile</strong> in the sidebar.</li>
+        <li>Click <strong>Edit</strong> to update your information.</li>
+        <li>Fill in all required fields: address, city, state, country, zip code, and phone number.</li>
+        <li>Click <strong>Save</strong> to apply your changes.</li>
+      </ol>
+
+      <h2>Navigating the Sidebar</h2>
+      <p>The sidebar provides access to all features based on your role:</p>
+      <ul>
+        <li><strong>Welcome</strong> &mdash; Your dashboard with quick stats</li>
+        <li><strong>Administration</strong> (Admin/Staff) &mdash; Districts, Schools, Users</li>
+        <li><strong>Assessments</strong> &mdash; Exams and Grades</li>
+        <li><strong>Content</strong> (Staff) &mdash; Questions, Image Types, Molecule Editor, Chemistry Tools</li>
+        <li><strong>Messages</strong> &mdash; In-app messaging</li>
+        <li><strong>Data</strong> (Staff) &mdash; CSV import/export</li>
+        <li><strong>Account</strong> &mdash; Profile settings and logout</li>
+        <li><strong>Knowledge Base</strong> &mdash; This documentation</li>
+      </ul>
+
+      <h2>Dark Mode</h2>
+      <p>EduChemSuite supports dark mode:</p>
+      <ol>
+        <li>Toggle the <strong>sun/moon icon</strong> at the bottom of the sidebar, or</li>
+        <li>Go to <strong>Account &gt; Profile &gt; Edit</strong> and toggle the <strong>Dark Mode</strong> switch.</li>
+      </ol>
+      <p>Your preference is saved and applied automatically on future logins.</p>
+
+      <h2>Email Privacy</h2>
+      <p>By default, your email is hidden from other users in messaging. To change this:</p>
+      <ol>
+        <li>Go to <strong>Account &gt; Profile &gt; Edit</strong>.</li>
+        <li>Toggle the <strong>Show Email</strong> switch.</li>
+        <li>Click <strong>Save</strong>.</li>
+      </ol>
+    }
+
+    <!-- CHEMISTRY TOOLS -->
+    @if (activePage === 'chemistry-tools' && isLoggedIn) {
+      <h1>Chemistry Tools Showcase</h1>
+      <p class="tools-intro">
+        EduChemSuite includes six interactive chemistry tools that help students visualize and manipulate molecular structures,
+        atomic models, and chemical equations. Below is a live showcase of each tool with real-world examples. These tools are
+        used when creating exam questions and available to students during assessments.
+      </p>
+
+      <div class="tool-showcase-grid">
+        <!-- Molecule Builder -->
+        <div class="tool-showcase-card">
+          <div class="tool-card-header">
+            <h2>Molecule Builder</h2>
+            <nz-tag nzColor="blue">Chemical Structure</nz-tag>
+          </div>
+          <p>Draw and visualize molecular structures. Add atoms, create bonds (single, double, triple), and arrange them spatially.</p>
+          <div class="feature-pills">
+            <nz-tag>Add atoms</nz-tag>
+            <nz-tag>Multiple bond types</nz-tag>
+            <nz-tag>Auto-layout</nz-tag>
+          </div>
+          <div class="tool-embed-frame">
+            <molecule-builder [graph]="showcaseMolecule" [readOnly]="true" [width]="740" [height]="400"></molecule-builder>
+          </div>
+        </div>
+
+        <!-- Atom Builder -->
+        <div class="tool-showcase-card">
+          <div class="tool-card-header">
+            <h2>Atom Builder</h2>
+            <nz-tag nzColor="green">Bohr Model</nz-tag>
+          </div>
+          <p>Construct Bohr models of atoms. Place protons and neutrons in the nucleus, then arrange electrons in shells.</p>
+          <div class="feature-pills">
+            <nz-tag>Nucleus building</nz-tag>
+            <nz-tag>Electron shells</nz-tag>
+            <nz-tag>Validation</nz-tag>
+          </div>
+          <div class="tool-embed-frame">
+            <atom-builder [graph]="showcaseAtom" [readOnly]="true" [width]="740" [height]="400"></atom-builder>
+          </div>
+        </div>
+
+        <!-- Electron Config -->
+        <div class="tool-showcase-card">
+          <div class="tool-card-header">
+            <h2>Electron Configuration</h2>
+            <nz-tag nzColor="volcano">Orbital Filling</nz-tag>
+          </div>
+          <p>Fill orbital diagrams with electrons following Hund's rule and the Aufbau principle. Shows 1s, 2s, 2p, 3s, 3p, 3d, etc.</p>
+          <div class="feature-pills">
+            <nz-tag>Orbital diagrams</nz-tag>
+            <nz-tag>Spin notation</nz-tag>
+            <nz-tag>Auto-validation</nz-tag>
+          </div>
+          <div class="tool-embed-frame">
+            <electron-config [graph]="showcaseElectronConfig" [readOnly]="true" [width]="740"></electron-config>
+          </div>
+        </div>
+
+        <!-- Equation Balancer -->
+        <div class="tool-showcase-card">
+          <div class="tool-card-header">
+            <h2>Equation Balancer</h2>
+            <nz-tag nzColor="cyan">Chemical Equation</nz-tag>
+          </div>
+          <p>Balance chemical equations by adjusting coefficients. Validates that each element is balanced on both sides.</p>
+          <div class="feature-pills">
+            <nz-tag>Coefficient adjustment</nz-tag>
+            <nz-tag>Element balance check</nz-tag>
+            <nz-tag>Formatted equations</nz-tag>
+          </div>
+          <div class="tool-embed-frame">
+            <equation-balancer [graph]="showcaseEquation" [readOnly]="true" [width]="740"></equation-balancer>
+          </div>
+        </div>
+
+        <!-- Stoichiometry Stepper -->
+        <div class="tool-showcase-card">
+          <div class="tool-card-header">
+            <h2>Stoichiometry Stepper</h2>
+            <nz-tag nzColor="orange">Dimensional Analysis</nz-tag>
+          </div>
+          <p>Solve multi-step dimensional analysis problems. Work through conversion factors step by step with guided feedback.</p>
+          <div class="feature-pills">
+            <nz-tag>Step-by-step</nz-tag>
+            <nz-tag>Unit tracking</nz-tag>
+            <nz-tag>Conversion factors</nz-tag>
+          </div>
+          <div class="tool-embed-frame">
+            <stoichiometry-stepper
+              [graph]="showcaseStoichiometry"
+              [readOnly]="true"
+              [width]="740"
+            ></stoichiometry-stepper>
+          </div>
+        </div>
+
+        <!-- Periodic Table Quiz - Full Width -->
+        <div class="tool-showcase-card tool-showcase-card--wide">
+          <div class="tool-card-header">
+            <h2>Periodic Table Quiz</h2>
+            <nz-tag nzColor="purple">Interactive Periodic Table</nz-tag>
+          </div>
+          <p>
+            Answer questions about element properties, trends, and classification. This example shows an electronegativity trend question
+            across Period 2 (lithium to fluorine).
+          </p>
+          <div class="feature-pills">
+            <nz-tag>Element identification</nz-tag>
+            <nz-tag>Periodic trends</nz-tag>
+            <nz-tag>Property questions</nz-tag>
+            <nz-tag>Visual highlighting</nz-tag>
+          </div>
+          <div class="tool-embed-frame">
+            <periodic-table-quiz [graph]="showcasePeriodicQuiz" [readOnly]="true" [width]="740"></periodic-table-quiz>
+          </div>
+        </div>
+      </div>
+
+      <h2>Using Chemistry Tools in Exams</h2>
+      <p>
+        When you create a question with a chemistry tool type (Chemical Structure, Atomic Structure, Electron Configuration, etc.),
+        the corresponding tool appears so you can build the correct answer. Students will see the same tool when answering the question.
+        Your answer is saved with the question for auto-grading and student comparison.
+      </p>
+
+      <h3>Grades and Feedback</h3>
+      <p>
+        Most chemistry tool questions are automatically graded. Some (Chemical Structure, Atomic Structure, Lewis Dot Structure) may be
+        flagged for manual review if they are partially correct. See <a (click)="selectPage('for-teachers')">For Teachers</a> for detailed
+        grading information.
+      </p>
+    }
+
+    <!-- FOR TEACHERS -->
+    @if (activePage === 'for-teachers') {
+      <h1>For Teachers</h1>
+
+      <h2>Managing Questions</h2>
+
+      <h3>Creating a Question</h3>
+      <ol>
+        <li>Go to <strong>Content &gt; Questions</strong> in the sidebar.</li>
+        <li>Click <strong>Create Question</strong>.</li>
+        <li>Fill in the question text, select a question type, and optionally add tags.</li>
+        <li>Add one or more <strong>answers</strong> &mdash; mark the correct answer(s).</li>
+        <li>Click <strong>Save</strong>.</li>
+      </ol>
+
+      <h3>Question Types</h3>
+      <nz-table [nzData]="['_']" [nzShowPagination]="false" nzSize="small" nzBordered>
+        <thead>
+          <tr><th>Type</th><th>Description</th><th>Grading</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Multiple Choice</strong></td><td>Students select one correct answer from a list.</td><td>Automatic</td></tr>
+          <tr><td><strong>True/False</strong></td><td>Students choose true or false.</td><td>Automatic</td></tr>
+          <tr><td><strong>Essay</strong></td><td>Students write a free-text response.</td><td>Manual review</td></tr>
+          <tr><td><strong>Chemical Structure</strong></td><td>Students draw a molecule using the interactive molecule editor. Grading compares atom connectivity and bond angles.</td><td>Auto + review</td></tr>
+          <tr><td><strong>Atomic Structure</strong></td><td>Students build a Bohr model by placing protons, neutrons, and electrons in the correct shells.</td><td>Auto + review</td></tr>
+          <tr><td><strong>Chemical Equation</strong></td><td>Students balance a chemical equation by adjusting coefficients for reactants and products.</td><td>Automatic</td></tr>
+          <tr><td><strong>Electron Configuration</strong></td><td>Students fill in orbital diagrams (1s, 2s, 2p, etc.) with the correct number of electrons.</td><td>Automatic</td></tr>
+          <tr><td><strong>Lewis Dot Structure</strong></td><td>Students draw Lewis structures including atoms, bonds, lone pairs, and formal charges.</td><td>Auto + review</td></tr>
+          <tr><td><strong>Periodic Table Quiz</strong></td><td>Students answer questions about element properties, trends, and classification using an interactive periodic table.</td><td>Automatic</td></tr>
+          <tr><td><strong>Stoichiometry</strong></td><td>Students solve multi-step dimensional analysis problems using a guided stepper interface.</td><td>Automatic</td></tr>
+        </tbody>
+      </nz-table>
+
+      <h3>Editing &amp; Versioning</h3>
+      <p>When you edit an existing question, EduChemSuite automatically increments the <strong>version number</strong>. Previous versions are preserved so exam history stays accurate.</p>
+
+      <h3>Soft Deletion</h3>
+      <p>Deleting a question sets it as <strong>inactive</strong> rather than removing it permanently. Inactive questions no longer appear in searches but remain linked to existing exams for historical records.</p>
+
+      <h2>Interactive Chemistry Tools</h2>
+      <p>EduChemSuite provides specialized interactive tools for chemistry question types. When creating a question, selecting a chemistry question type will display the corresponding tool for building the correct answer.</p>
+
+      <h3>Molecule Editor (Chemical Structure &amp; Lewis Dot Structure)</h3>
+      <p>The molecule editor (also accessible under <strong>Content &gt; Molecule Editor</strong>) lets you build chemical structure diagrams:</p>
+      <ul>
+        <li>Add atoms by selecting an element and clicking the canvas.</li>
+        <li>Create bonds by dragging between atoms. Supports single, double, and triple bonds.</li>
+        <li>For <strong>Lewis Dot Structures</strong>, add lone pairs and the tool calculates formal charges automatically.</li>
+        <li>The correct answer diagram is saved with the question for auto-grading.</li>
+      </ul>
+
+      <h3>Atomic Structure Builder (Bohr Model)</h3>
+      <p>Students construct Bohr models of atoms:</p>
+      <ul>
+        <li>Place protons and neutrons in the nucleus.</li>
+        <li>Place electrons in the correct electron shells (energy levels).</li>
+        <li>The tool validates shell capacity (2, 8, 18, 32 electrons per shell).</li>
+      </ul>
+
+      <h3>Chemical Equation Balancer</h3>
+      <p>Teachers define an unbalanced chemical equation, and students balance it:</p>
+      <ul>
+        <li>Set the reactants and products with their chemical formulas.</li>
+        <li>Students adjust coefficients to balance each element.</li>
+        <li>The tool verifies that all elements are balanced on both sides.</li>
+      </ul>
+
+      <h3>Electron Configuration Builder</h3>
+      <p>Students fill in orbital diagrams for a given element:</p>
+      <ul>
+        <li>Orbitals are listed in filling order (1s, 2s, 2p, 3s, etc.).</li>
+        <li>Students specify the number of electrons in each orbital.</li>
+        <li>Grading checks the total count and distribution against the correct configuration.</li>
+      </ul>
+
+      <h3>Periodic Table Quiz</h3>
+      <p>An interactive periodic table where teachers can create questions about:</p>
+      <ul>
+        <li>Element identification (name, symbol, atomic number).</li>
+        <li>Element classification (metals, nonmetals, metalloids).</li>
+        <li>Periodic trends (electronegativity, atomic radius, ionization energy).</li>
+      </ul>
+
+      <h3>Stoichiometry Stepper</h3>
+      <p>A guided dimensional analysis tool for multi-step stoichiometry problems:</p>
+      <ul>
+        <li>Students work through conversion factors step by step.</li>
+        <li>Each step includes a numerator and denominator with units.</li>
+        <li>The tool checks both the final numerical answer and the conversion path.</li>
+      </ul>
+
+      <h2>Building Exams</h2>
+
+      <h3>Creating an Exam</h3>
+      <ol>
+        <li>Go to <strong>Assessments &gt; Exams</strong>.</li>
+        <li>Click <strong>Create Exam</strong>.</li>
+        <li>Enter a name, description, and configure settings:
+          <ul>
+            <li><strong>Time Limit</strong> &mdash; Maximum minutes allowed (optional).</li>
+            <li><strong>Allow Retakes</strong> &mdash; Whether students can retake the exam.</li>
+            <li><strong>Max Attempts</strong> &mdash; Number of allowed attempts if retakes are enabled.</li>
+          </ul>
+        </li>
+        <li>Click <strong>Save</strong>.</li>
+      </ol>
+
+      <h3>Adding Questions to an Exam</h3>
+      <p><strong>One at a time:</strong></p>
+      <ol>
+        <li>Open an exam and click <strong>Add Question</strong>.</li>
+        <li>Search for and select a question.</li>
+      </ol>
+      <p><strong>Batch add from Questions page:</strong></p>
+      <ol>
+        <li>Go to <strong>Content &gt; Questions</strong>.</li>
+        <li>Use the checkboxes to select multiple questions.</li>
+        <li>Click the floating <strong>"Add to Quiz"</strong> button.</li>
+        <li>Choose to create a <strong>new exam</strong> or add to an <strong>existing exam</strong>.</li>
+      </ol>
+
+      <h3>Grading Settings for Chemistry Tools</h3>
+      <p>Chemistry tool questions use auto-grading where possible. Some question types may flag responses for manual review when the answer is partially correct:</p>
+      <nz-table [nzData]="['_']" [nzShowPagination]="false" nzSize="small" nzBordered>
+        <thead>
+          <tr><th>Type</th><th>Auto-Correct</th><th>Auto-Incorrect</th><th>Flagged for Review</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Chemical Structure</strong></td><td>Correct atoms, bonds, and angles within tolerance</td><td>Wrong atoms or bonds</td><td>Correct topology but angles outside tolerance</td></tr>
+          <tr><td><strong>Atomic Structure</strong></td><td>Correct protons, neutrons, and electrons</td><td>Wrong particle counts</td><td>Correct total but wrong shell distribution</td></tr>
+          <tr><td><strong>Lewis Dot Structure</strong></td><td>Correct structure, lone pairs, and formal charges</td><td>Wrong atom connectivity</td><td>Correct topology but wrong lone pairs or formal charges</td></tr>
+          <tr><td><strong>Chemical Equation</strong></td><td>All coefficients balanced correctly</td><td>Incorrect coefficients</td><td>&mdash;</td></tr>
+          <tr><td><strong>Electron Configuration</strong></td><td>Correct electron distribution</td><td>Incorrect configuration</td><td>&mdash;</td></tr>
+          <tr><td><strong>Periodic Table Quiz</strong></td><td>Correct answer selected</td><td>Incorrect answer</td><td>&mdash;</td></tr>
+          <tr><td><strong>Stoichiometry</strong></td><td>Correct final answer and conversion path</td><td>Incorrect answer</td><td>&mdash;</td></tr>
+        </tbody>
+      </nz-table>
+      <p>For <strong>Chemical Structure</strong> questions, you can set an <strong>Angle Tolerance</strong> (default: 15 degrees) when adding questions to an exam. Toggle <strong>Strict Diagram Grading</strong> on the exam to require exact angles.</p>
+
+      <h2>Reviewing Student Responses</h2>
+      <p>After students submit exams:</p>
+      <ol>
+        <li>Go to <strong>Assessments &gt; Exams</strong> and select the exam.</li>
+        <li>View individual student submissions.</li>
+        <li>For questions flagged for review, evaluate the student's response side-by-side with the correct answer and mark it correct or incorrect.</li>
+      </ol>
+
+      <h2>Grading</h2>
+      <p>Grading happens automatically when students submit exams via a background process. You'll receive a notification when grading is complete. For questions that need manual review, you'll see a <strong>pending review</strong> indicator.</p>
+    }
+
+    <!-- FOR STUDENTS -->
+    @if (activePage === 'for-students') {
+      <h1>For Students</h1>
+
+      <h2>Viewing Your Exams</h2>
+      <ol>
+        <li>Go to <strong>Assessments &gt; Exams</strong> in the sidebar.</li>
+        <li>You'll see a list of exams assigned to you.</li>
+      </ol>
+
+      <h2>Taking an Exam</h2>
+      <ol>
+        <li>Click on an exam to open it.</li>
+        <li>Click <strong>Start Exam</strong> (or <strong>Resume</strong> if you previously started).</li>
+        <li>Answer each question:
+          <ul>
+            <li><strong>Multiple Choice / True-False</strong>: Select your answer from the options provided.</li>
+            <li><strong>Essay</strong>: Type your response in the text area.</li>
+            <li><strong>Chemical Structure / Lewis Dot Structure</strong>: Use the molecule editor to draw atoms, bonds, and (for Lewis structures) lone pairs.</li>
+            <li><strong>Atomic Structure</strong>: Build a Bohr model by placing protons, neutrons, and electrons in the correct shells.</li>
+            <li><strong>Chemical Equation</strong>: Adjust coefficients to balance the given equation.</li>
+            <li><strong>Electron Configuration</strong>: Fill in the orbital diagram with the correct number of electrons per orbital.</li>
+            <li><strong>Periodic Table Quiz</strong>: Use the interactive periodic table to answer questions about elements.</li>
+            <li><strong>Stoichiometry</strong>: Work through a multi-step dimensional analysis problem using the guided stepper.</li>
+          </ul>
+        </li>
+        <li>Your responses are saved as you go.</li>
+        <li>When finished, click <strong>Submit Exam</strong>.</li>
+      </ol>
+
+      <h3>Important Notes</h3>
+      <ul>
+        <li>If the exam has a <strong>time limit</strong>, a timer will be displayed. The exam auto-submits when time runs out.</li>
+        <li>If <strong>retakes are allowed</strong>, you can take the exam again up to the maximum number of attempts.</li>
+        <li>Once submitted, your exam is graded automatically in the background. You'll receive a notification when your grade is ready.</li>
+      </ul>
+
+      <h2>Viewing Your Grades</h2>
+      <ol>
+        <li>Go to <strong>Assessments &gt; Grades</strong> in the sidebar.</li>
+        <li>You'll see a list of your graded exams with scores.</li>
+      </ol>
+
+      <h2>Reviewing Exam Results</h2>
+      <p>After grading is complete:</p>
+      <ol>
+        <li>Click on a graded exam to see your results.</li>
+        <li>For each question, you can see:
+          <ul>
+            <li>Your submitted answer</li>
+            <li>The correct answer</li>
+            <li>Whether your answer was correct</li>
+          </ul>
+        </li>
+      </ol>
+      <nz-alert nzType="info" nzMessage="Some chemistry tool questions (Chemical Structure, Atomic Structure, Lewis Dot Structure) may show as &quot;pending review&quot; if they require manual evaluation by your teacher." [nzShowIcon]="true" class="note"></nz-alert>
+
+      <h2>Messaging Your Teacher</h2>
+      <p>If you have questions about an exam or grade:</p>
+      <ol>
+        <li>Go to <strong>Messages</strong> in the sidebar.</li>
+        <li>Click <strong>Compose</strong>.</li>
+        <li>Select your teacher from the recipient list.</li>
+        <li>Write your message and send.</li>
+      </ol>
+      <p>See <a (click)="selectPage('messaging')">Messaging</a> for more details.</p>
+    }
+
+    <!-- FOR ADMINISTRATORS -->
+    @if (activePage === 'for-administrators') {
+      <h1>For Administrators</h1>
+
+      <h2>Managing Districts</h2>
+      <p>Districts are the top-level organizational unit.</p>
+      <ol>
+        <li>Go to <strong>Administration &gt; Districts</strong>.</li>
+        <li>Click <strong>Create District</strong> to add a new one.</li>
+        <li>Enter the district name and save.</li>
+      </ol>
+      <p>Each district can contain multiple schools.</p>
+
+      <h2>Managing Schools</h2>
+      <ol>
+        <li>Go to <strong>Administration &gt; Schools</strong>.</li>
+        <li>Click <strong>Create School</strong> to add a new one.</li>
+        <li>Enter the school name and assign it to a district.</li>
+        <li>Save.</li>
+      </ol>
+
+      <h2>Managing Users</h2>
+      <h3>Viewing Users</h3>
+      <ol>
+        <li>Go to <strong>Administration &gt; Users</strong>.</li>
+        <li>Use the search and filter tools to find users by name, email, district, school, or account type.</li>
+      </ol>
+
+      <h3>User Roles</h3>
+      <nz-table [nzData]="['_']" [nzShowPagination]="false" nzSize="small" nzBordered>
+        <thead>
+          <tr><th>Role</th><th>Access Level</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Admin</strong></td><td>Full access to all districts, schools, and users.</td></tr>
+          <tr><td><strong>AdminStaff</strong></td><td>Access to their assigned districts and schools. Can manage users within their scope.</td></tr>
+          <tr><td><strong>Staff</strong></td><td>Access to their assigned schools. Can create content and manage students in their schools.</td></tr>
+          <tr><td><strong>Student</strong></td><td>Can view assigned exams, take assessments, and see their grades.</td></tr>
+        </tbody>
+      </nz-table>
+
+      <h3>Data Scoping</h3>
+      <p>Users only see data within their scope:</p>
+      <ul>
+        <li><strong>Admins</strong> see everything.</li>
+        <li><strong>AdminStaff</strong> see users and data in their districts and schools.</li>
+        <li><strong>Staff</strong> see users and data in their schools.</li>
+        <li><strong>Students</strong> see only their own data and can message staff in their school.</li>
+      </ul>
+
+      <h2>Registration &amp; Invitations</h2>
+      <p>New users are invited via email-based registration tokens:</p>
+      <ol>
+        <li>Generate a <strong>registration invite</strong> for a user.</li>
+        <li>The user receives a link to create their account.</li>
+        <li>Once registered, assign them to the appropriate district(s) and school(s).</li>
+      </ol>
+
+      <h2>Assigning Users to Districts &amp; Schools</h2>
+      <p>Users can belong to multiple districts and schools:</p>
+      <ol>
+        <li>Open a user's profile from <strong>Administration &gt; Users</strong>.</li>
+        <li>Assign them to districts and/or schools as needed.</li>
+        <li>Their access scope updates automatically based on their role and assignments.</li>
+      </ol>
+
+      <h2>Bulk Operations</h2>
+      <p>For managing large numbers of users, districts, or schools, use the <strong>CSV import</strong> feature. See <a (click)="selectPage('data-management')">Data Management</a> for details.</p>
+    }
+
+    <!-- DATA MANAGEMENT -->
+    @if (activePage === 'data-management') {
+      <h1>Data Management</h1>
+      <p>The Data Management page (under <strong>Data</strong> in the sidebar) provides CSV import and export tools for bulk operations. This feature is available to <strong>Staff</strong> and <strong>Admin</strong> users.</p>
+
+      <h2>Exporting Data</h2>
+      <h3>How to Export</h3>
+      <ol>
+        <li>Go to <strong>Data</strong> in the sidebar.</li>
+        <li>Select the <strong>Export</strong> tab.</li>
+        <li>Choose the entity type to export (Users, Districts, Schools, Questions, Exams, Grades, or Exam Responses).</li>
+        <li>Optionally use search filters to narrow the results.</li>
+        <li>Click <strong>Export</strong> to download a CSV file.</li>
+      </ol>
+
+      <h3>Available Exports</h3>
+      <nz-table [nzData]="['_']" [nzShowPagination]="false" nzSize="small" nzBordered>
+        <thead>
+          <tr><th>Entity</th><th>Columns</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Users</strong></td><td>First Name, Last Name, Email, Account Type, Address, City, State, Country, Zip, Phone, Verified, Active, Schools, Districts, Created At</td></tr>
+          <tr><td><strong>Districts</strong></td><td>District Name, # Schools, # Administrators, Active, Created At</td></tr>
+          <tr><td><strong>Schools</strong></td><td>School Name, District, # Staff, # Students, Active, Created At</td></tr>
+          <tr><td><strong>Questions</strong></td><td>Question Text, Question Type, Author Email, Author Name, # Answers, Tags, Version, Active, Created At</td></tr>
+          <tr><td><strong>Exams</strong></td><td>Name, Description, Time Limit, Allow Retakes, Max Attempts, Is Test, # Questions, Active, Created At</td></tr>
+          <tr><td><strong>Grades</strong></td><td>Student Email, Student Name, Exam Name, Grade, Created At</td></tr>
+          <tr><td><strong>Exam Responses</strong></td><td>Student Email, Student Name, Exam Name, Question Text, Response Text, Selected Answer, Is Correct, Is Graded, Created At</td></tr>
+        </tbody>
+      </nz-table>
+
+      <h2>Importing Data</h2>
+      <h3>How to Import</h3>
+      <ol>
+        <li>Go to <strong>Data</strong> in the sidebar.</li>
+        <li>Select the <strong>Import</strong> tab.</li>
+        <li>Choose the entity type you want to import.</li>
+        <li>Download the <strong>CSV template</strong> for that entity to see the expected format.</li>
+        <li>Fill in the template with your data.</li>
+        <li>Upload the CSV file and click <strong>Import</strong>.</li>
+      </ol>
+
+      <h3>Import Behavior (Upsert)</h3>
+      <p>Imports use <strong>upsert logic</strong> &mdash; matching records are updated, new records are created:</p>
+      <nz-table [nzData]="['_']" [nzShowPagination]="false" nzSize="small" nzBordered>
+        <thead>
+          <tr><th>Entity</th><th>Match Criteria</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Districts</strong></td><td>District name (case-insensitive)</td></tr>
+          <tr><td><strong>Schools</strong></td><td>School name + district name (auto-creates district if missing)</td></tr>
+          <tr><td><strong>Users</strong></td><td>Email (case-insensitive; password required for new users)</td></tr>
+          <tr><td><strong>Questions</strong></td><td>Question text + author email (increments version on update)</td></tr>
+          <tr><td><strong>Answers</strong></td><td>Question text + answer text</td></tr>
+          <tr><td><strong>Grades</strong></td><td>Student email + exam name</td></tr>
+        </tbody>
+      </nz-table>
+
+      <h3>Import Results</h3>
+      <p>After an import completes, you'll see a summary:</p>
+      <ul>
+        <li><strong>Total rows</strong> processed</li>
+        <li><strong>Created</strong> count (new records)</li>
+        <li><strong>Updated</strong> count (existing records modified)</li>
+        <li><strong>Errors</strong> with row-level details</li>
+      </ul>
+
+      <h3>Tips</h3>
+      <ul>
+        <li>Always download and use the <strong>template</strong> to ensure correct column headers.</li>
+        <li>For user imports, include a <strong>password</strong> column for new users.</li>
+        <li>School imports will automatically create districts that don't exist yet.</li>
+        <li>Question imports increment the version number when updating existing questions.</li>
+      </ul>
+    }
+
+    <!-- MESSAGING -->
+    @if (activePage === 'messaging') {
+      <h1>Messaging</h1>
+      <p>EduChemSuite includes a built-in real-time messaging system. Messages are delivered instantly without needing to refresh the page.</p>
+
+      <h2>Composing a Message</h2>
+      <ol>
+        <li>Go to <strong>Messages</strong> in the sidebar.</li>
+        <li>Click <strong>Compose</strong>.</li>
+        <li>Select a recipient from the dropdown. The list shows users you're allowed to message based on your role and school/district assignments.</li>
+        <li>Type your message.</li>
+        <li>Click <strong>Send</strong>.</li>
+      </ol>
+
+      <h2>Inbox</h2>
+      <p>Your inbox shows all messages you've received, sorted by most recent. Click on a message to read it and reply.</p>
+
+      <h2>Replying</h2>
+      <ol>
+        <li>Open a message from your inbox.</li>
+        <li>Type your reply in the text box at the bottom.</li>
+        <li>Click <strong>Send</strong>.</li>
+      </ol>
+
+      <h2>Who Can I Message?</h2>
+      <p>Messaging follows the same data scoping rules as the rest of the platform:</p>
+      <nz-table [nzData]="['_']" [nzShowPagination]="false" nzSize="small" nzBordered>
+        <thead>
+          <tr><th>Your Role</th><th>You Can Message</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Admin</strong></td><td>Any user in the system</td></tr>
+          <tr><td><strong>AdminStaff</strong></td><td>Users in your districts and schools</td></tr>
+          <tr><td><strong>Staff</strong></td><td>Users in your schools</td></tr>
+          <tr><td><strong>Student</strong></td><td>Staff members in your school</td></tr>
+        </tbody>
+      </nz-table>
+
+      <h2>Privacy</h2>
+      <ul>
+        <li>By default, only names are shown in the messaging interface (not email addresses).</li>
+        <li>Users can opt in to showing their email by enabling <strong>Show Email</strong> in their profile settings.</li>
+      </ul>
+    }
+
+    <!-- FAQ -->
+    @if (activePage === 'faq') {
+      <h1>FAQ</h1>
+
+      <h2>Account &amp; Login</h2>
+
+      <h3>I forgot my password. How do I reset it?</h3>
+      <p>Click the <strong>Forgot Password</strong> link on the login page and follow the instructions. If that doesn't work, contact your administrator.</p>
+
+      <h3>How do I get an account?</h3>
+      <p>Accounts are created through registration invitations. Ask your school administrator for an invite link.</p>
+
+      <h3>How do I change my password?</h3>
+      <p>Go to <strong>Account &gt; Profile</strong>, click <strong>Edit</strong>, and update your password fields.</p>
+
+      <h2>Exams &amp; Grading</h2>
+
+      <h3>My exam grade shows as "pending." What does that mean?</h3>
+      <p>Exams are graded automatically in the background after submission. If your grade is still pending, the grading process is in progress or some diagram questions need manual review by your teacher.</p>
+
+      <h3>Can I retake an exam?</h3>
+      <p>Only if your teacher has enabled retakes for that exam. You'll see a <strong>Retake</strong> option if allowed, up to the maximum number of attempts.</p>
+
+      <h3>My answer was marked "pending review." Why?</h3>
+      <p>Some chemistry tool questions (Chemical Structure, Atomic Structure, Lewis Dot Structure) can flag partially correct answers for your teacher to review manually. For example, if your molecule has the right atoms and bonds but the angles are slightly off, or your Lewis structure has correct topology but wrong lone pairs.</p>
+
+      <h3>I submitted my exam but don't see my grade yet.</h3>
+      <p>Grading runs in the background. You'll receive a notification when it's complete. This usually takes just a few seconds.</p>
+
+      <h2>Questions &amp; Content</h2>
+
+      <h3>How do I create a chemistry tool question?</h3>
+      <p>When creating a question, select the desired chemistry question type (e.g., Chemical Structure, Atomic Structure, Chemical Equation, etc.). The corresponding interactive tool will appear so you can build the correct answer. Students will see the same tool when taking the exam.</p>
+
+      <h3>What happens when I edit a question that's already on an exam?</h3>
+      <p>Editing a question creates a new version. Existing exams keep the version of the question that was on them when students took the exam.</p>
+
+      <h3>What chemistry tools are available?</h3>
+      <p>EduChemSuite includes 7 interactive chemistry tools: Chemical Structure (molecule editor), Atomic Structure (Bohr model), Chemical Equation (balancer), Electron Configuration (orbital filling), Lewis Dot Structure, Periodic Table Quiz, and Stoichiometry (dimensional analysis stepper). See <a (click)="selectPage('for-teachers')">For Teachers</a> for details on each tool.</p>
+
+      <h2>Data Management</h2>
+
+      <h3>What format should my CSV file be in?</h3>
+      <p>Download the template for the entity type you want to import. Use that as your starting point to ensure correct column headers and formatting.</p>
+
+      <h3>Will importing overwrite existing data?</h3>
+      <p>Imports use upsert logic &mdash; records matching the criteria (e.g., same email for users) are updated, while new records are created. See <a (click)="selectPage('data-management')">Data Management</a> for match criteria details.</p>
+
+      <h3>Can I undo an import?</h3>
+      <p>There's no automatic undo. We recommend exporting your current data before importing to have a backup.</p>
+
+      <h2>Messaging</h2>
+
+      <h3>I can't find a user to message. Why?</h3>
+      <p>You can only message users within your data scope. Students can only message staff in their school. Staff can message users in their school. Admins can message anyone. See <a (click)="selectPage('messaging')">Messaging</a> for details.</p>
+
+      <h3>Are messages delivered in real time?</h3>
+      <p>Yes. Messages are delivered instantly via SignalR. You don't need to refresh the page.</p>
+
+      <h2>General</h2>
+
+      <h3>How do I switch to dark mode?</h3>
+      <p>Click the sun/moon icon at the bottom of the sidebar, or toggle it in your profile settings.</p>
+
+      <h3>The page isn't loading correctly. What should I do?</h3>
+      <p>Try these steps:</p>
+      <ol>
+        <li>Refresh the page (Ctrl+F5 for a hard refresh).</li>
+        <li>Clear your browser cache.</li>
+        <li>Try a different browser.</li>
+        <li>If the problem persists, contact your administrator.</li>
+      </ol>
+    }
+
+  </nz-content>
+</nz-layout>

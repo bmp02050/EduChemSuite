@@ -1,0 +1,37 @@
+/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
+/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "outDir": "./dist/out-tsc",
+    "strict": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "sourceMap": true,
+    "declaration": false,
+    "experimentalDecorators": true,
+    "moduleResolution": "bundler",
+    "importHelpers": true,
+    "target": "ES2022",
+    "module": "ES2022",
+    "paths": {
+      "molecule-builder": ["./projects/molecule-builder/src/public-api.ts"],
+      "atom-builder": ["./projects/atom-builder/src/public-api.ts"],
+      "chemistry-data": ["./projects/chemistry-data/src/public-api.ts"],
+      "equation-balancer": ["./projects/equation-balancer/src/public-api.ts"],
+      "electron-config": ["./projects/electron-config/src/public-api.ts"],
+      "periodic-table-quiz": ["./projects/periodic-table-quiz/src/public-api.ts"],
+      "stoichiometry-stepper": ["./projects/stoichiometry-stepper/src/public-api.ts"]
+    }
+  },
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
+  }
+}

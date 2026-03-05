@@ -1,0 +1,323 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "UI": {
+      "projectType": "application",
+      "schematics": {},
+      "root": "",
+      "sourceRoot": "src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:application",
+          "options": {
+            "outputPath": "dist/ui",
+            "index": "src/index.html",
+            "browser": "src/main.ts",
+            "polyfills": [
+              "zone.js"
+            ],
+            "tsConfig": "tsconfig.app.json",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "public"
+              },
+              "src/assets",
+              {
+                "glob": "**/*",
+                "input": "./node_modules/@ant-design/icons-angular/src/inline-svg/",
+                "output": "/assets/"
+              }
+            ],
+            "styles": [
+              "src/theme.less",
+              "src/styles.css",
+              {
+                "input": "node_modules/ng-zorro-antd/ng-zorro-antd.dark.css",
+                "bundleName": "dark-theme",
+                "inject": false
+              }
+            ],
+            "scripts": []
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "10MB",
+                  "maximumError": "12MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "4kB",
+                  "maximumError": "6kB"
+                }
+              ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            },
+            "docker": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "10MB",
+                  "maximumError": "12MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "4kB",
+                  "maximumError": "6kB"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.docker.ts"
+                }
+              ],
+              "outputHashing": "all"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "port": 4300,
+            "proxyConfig": "proxy.conf.json"
+          },
+          "configurations": {
+            "production": {
+              "buildTarget": "UI:build:production"
+            },
+            "development": {
+              "buildTarget": "UI:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n"
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
+            "tsConfig": "tsconfig.spec.json",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "public"
+              }
+            ],
+            "styles": [
+              "src/styles.css"
+            ],
+            "scripts": []
+          }
+        }
+      }
+    },
+    "atom-builder": {
+      "projectType": "library",
+      "root": "projects/atom-builder",
+      "sourceRoot": "projects/atom-builder/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "project": "projects/atom-builder/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/atom-builder/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/atom-builder/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        }
+      }
+    },
+    "molecule-builder": {
+      "projectType": "library",
+      "root": "projects/molecule-builder",
+      "sourceRoot": "projects/molecule-builder/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "project": "projects/molecule-builder/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/molecule-builder/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/molecule-builder/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        }
+      }
+    },
+    "chemistry-data": {
+      "projectType": "library",
+      "root": "projects/chemistry-data",
+      "sourceRoot": "projects/chemistry-data/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "project": "projects/chemistry-data/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/chemistry-data/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/chemistry-data/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        }
+      }
+    },
+    "equation-balancer": {
+      "projectType": "library",
+      "root": "projects/equation-balancer",
+      "sourceRoot": "projects/equation-balancer/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "project": "projects/equation-balancer/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/equation-balancer/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/equation-balancer/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        }
+      }
+    },
+    "electron-config": {
+      "projectType": "library",
+      "root": "projects/electron-config",
+      "sourceRoot": "projects/electron-config/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "project": "projects/electron-config/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/electron-config/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/electron-config/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        }
+      }
+    },
+    "periodic-table-quiz": {
+      "projectType": "library",
+      "root": "projects/periodic-table-quiz",
+      "sourceRoot": "projects/periodic-table-quiz/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "project": "projects/periodic-table-quiz/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/periodic-table-quiz/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/periodic-table-quiz/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        }
+      }
+    },
+    "stoichiometry-stepper": {
+      "projectType": "library",
+      "root": "projects/stoichiometry-stepper",
+      "sourceRoot": "projects/stoichiometry-stepper/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "project": "projects/stoichiometry-stepper/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/stoichiometry-stepper/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/stoichiometry-stepper/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        }
+      }
+    }
+  },
+  "cli": {
+    "analytics": false
+  },
+  "schematics": {
+    "@schematics/angular:component": {
+      "type": "component"
+    },
+    "@schematics/angular:directive": {
+      "type": "directive"
+    },
+    "@schematics/angular:service": {
+      "type": "service"
+    },
+    "@schematics/angular:guard": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:interceptor": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:module": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:pipe": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:resolver": {
+      "typeSeparator": "."
+    }
+  }
+}

@@ -1,0 +1,53 @@
+<div class="page-container-center">
+  <div class="auth-wrapper">
+    <div class="auth-logo">
+      <img src="assets/logo.svg" alt="EduChem Suite" />
+    </div>
+    <nz-card class="auth-card" nzTitle="EduChem Suite">
+      <form nz-form [formGroup]="form" (ngSubmit)="onSubmit()" nzLayout="vertical">
+        <nz-form-item>
+          <nz-form-label nzRequired>Email</nz-form-label>
+          <nz-form-control nzErrorTip="Email is required">
+            <input nz-input formControlName="email" placeholder="Enter your email" />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label nzRequired>Password</nz-form-label>
+          <nz-form-control nzErrorTip="Password is required">
+            <input nz-input formControlName="password" type="password" placeholder="Enter your password" />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-control>
+            <button nz-button nzType="primary" nzBlock [nzLoading]="loading" type="submit">Login</button>
+          </nz-form-control>
+        </nz-form-item>
+
+        <div class="forgot-password-link">
+          <a routerLink="/account/forgot-password">Forgot your password?</a>
+        </div>
+
+        <div class="kb-link">
+          <a routerLink="/knowledge-base">Knowledge Base</a>
+        </div>
+
+        <div class="kb-link">
+          <a routerLink="/contact">Contact Us</a>
+        </div>
+
+        <alert></alert>
+
+        @if (showResendVerification) {
+          <div style="text-align: center; margin-top: 12px;">
+            <span>Didn't receive a verification email? </span>
+            <a (click)="resendVerification()" [class.disabled]="resendLoading">
+              {{ resendLoading ? 'Sending...' : 'Resend Verification Email' }}
+            </a>
+          </div>
+        }
+      </form>
+    </nz-card>
+  </div>
+</div>

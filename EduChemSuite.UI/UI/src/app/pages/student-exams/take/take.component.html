@@ -1,0 +1,173 @@
+<div class="page-container-wide">
+  <alert></alert>
+  <nz-spin [nzSpinning]="loading">
+    @if (exam && !loading) {
+      <div>
+        <!-- Header -->
+        <nz-card>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <h2 style="margin: 0;">{{ exam.name }}</h2>
+              @if (exam.description) {
+                <p style="color: #666; margin: 4px 0 0;">{{ exam.description }}</p>
+              }
+            </div>
+            <div style="text-align: right;">
+              @if (timeLimitMinutes) {
+                <div [style.color]="timeRemainingSeconds < 60 ? 'red' : '#333'"
+                  style="font-size: 24px; font-weight: bold;">
+                  {{ formattedTimeRemaining }}
+                </div>
+              }
+              <div style="color: #666;">{{ answeredCount }} / {{ questions.length }} answered</div>
+            </div>
+          </div>
+          <nz-progress [nzPercent]="progressPercent" nzSize="small" style="margin-top: 8px;"></nz-progress>
+        </nz-card>
+        <div style="display: flex; gap: 16px; margin-top: 16px;">
+          <!-- Question Navigation -->
+          <div style="min-width: 200px;">
+            <nz-card nzTitle="Questions" nzSize="small">
+              @for (q of questions; track q; let i = $index) {
+                <div
+                  (click)="goToQuestion(i)"
+                  [style.background]="i === currentQuestionIndex ? '#e6f7ff' : 'transparent'"
+                  [style.border-left]="isQuestionAnswered(i) ? '3px solid #52c41a' : '3px solid #d9d9d9'"
+                  style="padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #f0f0f0;">
+                  <span style="font-weight: 500;">Q{{ i + 1 }}</span>
+                  <span style="color: #999; margin-left: 8px; font-size: 12px;">{{ q.questionType?.description }}</span>
+                </div>
+              }
+            </nz-card>
+          </div>
+          <!-- Current Question -->
+          <div style="flex: 1;">
+            @if (currentQuestion) {
+              <nz-card [nzTitle]="'Question ' + (currentQuestionIndex + 1) + ' of ' + questions.length">
+                <div style="font-size: 16px; margin-bottom: 16px;">{{ currentQuestion.questionText }}</div>
+                <!-- Multiple Choice -->
+                @if (isQuestionType('multiple choice') && currentQuestion.options) {
+                  <div>
+                    <nz-radio-group [ngModel]="currentResponse?.answerId" (ngModelChange)="selectAnswer($event)">
+                      @for (a of currentQuestion.options; track a) {
+                        <label nz-radio [nzValue]="a.id"
+                          style="display: block; margin-bottom: 8px; padding: 8px; border: 1px solid #d9d9d9; border-radius: 4px;">
+                          {{ a.text }}
+                        </label>
+                      }
+                    </nz-radio-group>
+                  </div>
+                }
+                <!-- Essay -->
+                @if (isQuestionType('essay')) {
+                  <div>
+                    <textarea nz-input [ngModel]="currentResponse?.responseText"
+                      (ngModelChange)="updateResponseText($event)"
+                    placeholder="Write your answer here..." rows="8"></textarea>
+                  </div>
+                }
+                <!-- Chemical Structure Drawing / Diagram -->
+                @if (isMoleculeType() && moleculeReady) {
+                  <div #moleculeContainer>
+                    <molecule-builder
+                      [graph]="moleculeGraph"
+                      [width]="moleculeWidth"
+                      [height]="moleculeHeight"
+                      (graphChange)="onMoleculeGraphChange($event)">
+                    </molecule-builder>
+                  </div>
+                }
+                <!-- Lewis Dot Structure -->
+                @if (isLewisStructureType() && moleculeReady) {
+                  <div #moleculeContainer>
+                    <molecule-builder
+                      [graph]="moleculeGraph"
+                      [width]="moleculeWidth"
+                      [height]="moleculeHeight"
+                      (graphChange)="onMoleculeGraphChange($event)">
+                    </molecule-builder>
+                  </div>
+                }
+                <!-- Atomic Structure (Bohr Model) -->
+                @if (isAtomicStructureType() && moleculeReady) {
+                  <div #moleculeContainer>
+                    <atom-builder
+                      [graph]="atomGraph"
+                      [hideElement]="true"
+                      [width]="moleculeWidth"
+                      [height]="moleculeHeight"
+                      (graphChange)="onAtomGraphChange($event)">
+                    </atom-builder>
+                  </div>
+                }
+                <!-- Chemical Equation Balancer -->
+                @if (isChemicalEquationType() && moleculeReady) {
+                  <div>
+                    <equation-balancer
+                      [graph]="equationGraph"
+                      [showInput]="false"
+                      [readOnly]="false"
+                      [width]="moleculeWidth"
+                      (graphChange)="onEquationGraphChange($event)">
+                    </equation-balancer>
+                  </div>
+                }
+                <!-- Electron Configuration -->
+                @if (isElectronConfigType() && moleculeReady) {
+                  <div>
+                    <electron-config
+                      [graph]="electronConfigGraph"
+                      [showElementPicker]="false"
+                      [readOnly]="false"
+                      [width]="moleculeWidth"
+                      (graphChange)="onElectronConfigGraphChange($event)">
+                    </electron-config>
+                  </div>
+                }
+                <!-- Periodic Table Quiz -->
+                @if (isPeriodicTableType() && moleculeReady) {
+                  <div>
+                    <periodic-table-quiz
+                      [graph]="periodicTableQuiz"
+                      [responseGraph]="periodicTableResponse"
+                      [readOnly]="false"
+                      [width]="moleculeWidth"
+                      (responseChange)="onPeriodicTableResponseChange($event)">
+                    </periodic-table-quiz>
+                  </div>
+                }
+                <!-- Stoichiometry Stepper -->
+                @if (isStoichiometryType() && moleculeReady) {
+                  <div>
+                    <stoichiometry-stepper
+                      [graph]="stoichiometryGraph"
+                      [showConfig]="false"
+                      [readOnly]="false"
+                      [width]="moleculeWidth"
+                      (graphChange)="onStoichiometryGraphChange($event)">
+                    </stoichiometry-stepper>
+                  </div>
+                }
+                <!-- Navigation -->
+                <div style="margin-top: 24px; display: flex; justify-content: space-between;">
+                  <button nz-button (click)="prevQuestion()" [disabled]="currentQuestionIndex === 0">Previous</button>
+                  @if (currentQuestionIndex < questions.length - 1) {
+                    <button
+                    nz-button nzType="primary" (click)="nextQuestion()">Next</button>
+                  }
+                  @if (currentQuestionIndex === questions.length - 1) {
+                    <button
+                      nz-button nzType="primary" nzDanger
+                      nz-popconfirm nzPopconfirmTitle="Are you sure you want to submit this exam? This action cannot be undone."
+                      (nzOnConfirm)="submitExam()"
+                    [nzLoading]="submitting">Submit Exam</button>
+                  }
+                </div>
+              </nz-card>
+            }
+          </div>
+        </div>
+      </div>
+    }
+  </nz-spin>
+</div>

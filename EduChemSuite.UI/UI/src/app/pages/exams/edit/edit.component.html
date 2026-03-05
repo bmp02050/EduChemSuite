@@ -1,0 +1,207 @@
+<div class="page-container-wide">
+  <alert></alert>
+  <nz-card nzTitle="Edit Exam">
+    <nz-spin [nzSpinning]="loading">
+      @if (exam) {
+        <form nz-form [formGroup]="examForm" (ngSubmit)="onSubmit()" nzLayout="vertical">
+          <nz-form-item>
+            <nz-form-label nzRequired>Name</nz-form-label>
+            <nz-form-control nzErrorTip="Exam name is required">
+              <input nz-input formControlName="name" placeholder="Enter exam name" />
+            </nz-form-control>
+          </nz-form-item>
+          <nz-form-item>
+            <nz-form-label>Description</nz-form-label>
+            <nz-form-control>
+              <textarea nz-input formControlName="description" placeholder="Enter exam description (optional)" rows="4"></textarea>
+            </nz-form-control>
+          </nz-form-item>
+          <button nz-button nzType="primary" type="submit" [disabled]="!examForm.valid">Save Changes</button>
+          <button nz-button type="button" routerLink="/exams" style="margin-left: 8px;">Cancel</button>
+          @if (exam?.isTest) {
+            <button nz-button nzType="dashed" type="button"
+              [routerLink]="'/student-exams/take/' + examId" style="margin-left: 8px;"
+            [disabled]="examQuestions.length === 0">Take Test</button>
+          }
+          @if (!exam?.isTest) {
+            <button nz-button nzType="dashed" type="button"
+              [routerLink]="'/exams/preview/' + examId" style="margin-left: 8px;"
+            [disabled]="examQuestions.length === 0">Practice Exam</button>
+          }
+        </form>
+      }
+    </nz-spin>
+  </nz-card>
+
+  @if (exam) {
+    <nz-card nzTitle="Exam Settings" class="mt-24">
+      <form nz-form [formGroup]="examForm" nzLayout="vertical">
+        <nz-form-item>
+          <nz-form-label>Time Limit (minutes)</nz-form-label>
+          <nz-form-control nzExtra="Leave empty for no time limit">
+            <nz-input-number formControlName="timeLimitMinutes" [nzMin]="1" [nzMax]="600"
+            nzPlaceHolder="No limit" style="width: 200px;"></nz-input-number>
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-label>Allow Retakes</nz-form-label>
+          <nz-form-control>
+            <nz-switch formControlName="allowRetakes"></nz-switch>
+          </nz-form-control>
+        </nz-form-item>
+        @if (examForm.value.allowRetakes) {
+          <nz-form-item>
+            <nz-form-label>Max Attempts</nz-form-label>
+            <nz-form-control>
+              <nz-input-number formControlName="maxAttempts" [nzMin]="1" [nzMax]="100" style="width: 200px;"></nz-input-number>
+            </nz-form-control>
+          </nz-form-item>
+        }
+        <nz-form-item>
+          <nz-form-label>Is Test Exam</nz-form-label>
+          <nz-form-control nzExtra="Test exams can be taken by teachers without needing an assignment">
+            <nz-switch formControlName="isTest"></nz-switch>
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-label>Strict Diagram Grading</nz-form-label>
+          <nz-form-control nzExtra="When enabled, diagram answers must also match the spatial arrangement (bond angles, geometry) of the correct answer">
+            <nz-switch formControlName="strictDiagramGrading"></nz-switch>
+          </nz-form-control>
+        </nz-form-item>
+      </form>
+    </nz-card>
+  }
+
+  @if (exam) {
+    <nz-card nzTitle="Questions" class="mt-24">
+      <nz-table #questionTable [nzData]="examQuestions" [nzShowPagination]="false" nzSize="small">
+        <thead>
+          <tr>
+            <th>Question Text</th>
+            <th>Type</th>
+            <th>Answers</th>
+            @if (examForm.value.strictDiagramGrading) {
+              <th>
+                Angle Tolerance %
+                <span nz-icon nzType="question-circle" nz-tooltip
+                  nzTooltipTitle="Percentage error allowed per bond angle. Leave empty for default 15° fixed tolerance."
+                style="margin-left: 4px; cursor: help;"></span>
+              </th>
+            }
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (eq of questionTable.data; track eq) {
+            <tr>
+              <td>{{ eq.question?.questionText }}</td>
+              <td>{{ eq.question?.questionType?.description }}</td>
+              <td>{{ eq.question?.answers?.length || 0 }}</td>
+              @if (examForm.value.strictDiagramGrading) {
+                <td>
+                  @if (isDiagramQuestion(eq)) {
+                    <nz-input-number
+                      [(ngModel)]="eq.angleTolerancePercent" [ngModelOptions]="{standalone: true}"
+                      [nzMin]="0" [nzMax]="100" nzPlaceHolder="Default (15°)"
+                      style="width: 130px;"
+                    (nzBlur)="updateAngleTolerance(eq, eq.angleTolerancePercent ?? null)"></nz-input-number>
+                  }
+                  @if (!isDiagramQuestion(eq)) {
+                    <span style="color: #999;">N/A</span>
+                  }
+                </td>
+              }
+              <td>
+                <a nz-button nzType="link" [routerLink]="'/questions/edit/' + eq.question?.id">Edit</a>
+                <button nz-button nzType="link" nzDanger
+                  nz-popconfirm nzPopconfirmTitle="Remove this question from the exam?"
+                (nzOnConfirm)="removeQuestion(eq.id!)">Remove</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </nz-table>
+      <div style="margin-top: 12px; display: flex; gap: 8px; align-items: center;">
+        <nz-select [(ngModel)]="selectedQuestionId" [ngModelOptions]="{standalone: true}"
+          nzPlaceHolder="Select a question to add" style="width: 400px;"
+          nzShowSearch nzAllowClear [nzOptions]="questionOptions">
+        </nz-select>
+        <button nz-button nzType="primary" type="button" (click)="addQuestion()" [disabled]="!selectedQuestionId">Add Question</button>
+      </div>
+    </nz-card>
+  }
+
+  @if (exam) {
+    <nz-card nzTitle="Assigned Students" class="mt-24">
+      <nz-table #assignmentTable [nzData]="assignments" [nzShowPagination]="false" nzSize="small">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Email</th>
+            <th>Assigned</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (a of assignmentTable.data; track a) {
+            <tr>
+              <td>{{ a.user?.firstName }} {{ a.user?.lastName }}</td>
+              <td>{{ a.user?.email }}</td>
+              <td>{{ a.assignedAt | date:'short' }}</td>
+              <td>
+                <button nz-button nzType="link" nzDanger
+                  nz-popconfirm nzPopconfirmTitle="Unassign this student?"
+                (nzOnConfirm)="unassignStudent(a.userId!)">Unassign</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </nz-table>
+      <div style="margin-top: 12px; display: flex; gap: 8px; align-items: center;">
+        <nz-select [(ngModel)]="selectedStudentId" [ngModelOptions]="{standalone: true}"
+          nzPlaceHolder="Select a student to assign" style="width: 400px;"
+          nzShowSearch nzAllowClear [nzOptions]="studentOptions">
+        </nz-select>
+        <button nz-button nzType="primary" type="button" (click)="assignStudent()" [disabled]="!selectedStudentId">Assign Student</button>
+      </div>
+    </nz-card>
+  }
+
+  @if (exam) {
+    <nz-card nzTitle="Grades" class="mt-24" [nzExtra]="reviewBtn">
+      <ng-template #reviewBtn>
+        <button nz-button nzType="primary" [routerLink]="'/exams/review/' + examId">Review Responses</button>
+      </ng-template>
+      @if (!exam.grades?.length) {
+        <div>
+          <p style="color: #999;">No grades yet.</p>
+        </div>
+      }
+      @if (exam.grades?.length) {
+        <nz-table #gradeTable [nzData]="exam.grades!" [nzShowPagination]="false" nzSize="small">
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Grade</th>
+              <th>Date</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (g of gradeTable.data; track g) {
+              <tr>
+                <td>{{ g.user?.firstName }} {{ g.user?.lastName }}</td>
+                <td>{{ g.gradeValue }}</td>
+                <td>{{ g.createdAt | date:'short' }}</td>
+                <td>
+                  <a nz-button nzType="link" [routerLink]="'/exams/review/' + examId">Review</a>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </nz-table>
+      }
+    </nz-card>
+  }
+</div>

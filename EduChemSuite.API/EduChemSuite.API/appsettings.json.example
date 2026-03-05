@@ -1,0 +1,28 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "Jwt": {
+    "Issuer": "https://www.educhemsuite.com/",
+    "Audience": "https://www.educhemsuite.com/",
+    "Key": "CHANGE_ME_generate_a_64_char_random_string"
+  },
+  "ConnectionStrings": {
+    "dev": "host=localhost;Username=postgres;Password=CHANGE_ME;Database=educhemsuite;Port=5432;"
+  },
+  "EmailSettings": {
+    "SmtpServer": "smtp.gmail.com",
+    "SmtpPort": 587,
+    "SmtpUser": "your-email@gmail.com",
+    "SmtpPassword": "your-app-password",
+    "EnableSsl": true
+  },
+  "FrontendUrl": "http://localhost:4300",
+  "Seq": {
+    "Url": ""
+  }
+}

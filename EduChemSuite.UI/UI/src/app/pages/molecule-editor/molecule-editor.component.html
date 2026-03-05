@@ -1,0 +1,67 @@
+<div class="page-container-wide">
+  @if (error) {
+    <nz-alert nzType="error" [nzMessage]="error" nzCloseable nzShowIcon
+    (nzOnClose)="error = null" style="margin-bottom: 16px;"></nz-alert>
+  }
+  @if (success) {
+    <nz-alert nzType="success" [nzMessage]="success" nzCloseable nzShowIcon
+    (nzOnClose)="success = null" style="margin-bottom: 16px;"></nz-alert>
+  }
+
+  <nz-card [nzTitle]="editingId ? 'Edit Structure' : 'Molecule Editor'">
+    <molecule-builder
+      [graph]="graph"
+      [width]="800"
+      [height]="500"
+      (graphChange)="onGraphChange($event)">
+    </molecule-builder>
+
+    <div style="margin-top: 16px;">
+      <nz-input-group>
+        <input nz-input placeholder="Structure name" [(ngModel)]="structureName" style="max-width: 400px;" />
+      </nz-input-group>
+    </div>
+
+    <div style="margin-top: 16px; display: flex; gap: 8px;">
+      <button nz-button nzType="primary" (click)="save()" [nzLoading]="saving"
+        [disabled]="!graph || !structureName.trim()">
+        {{ editingId ? 'Update' : 'Save' }}
+      </button>
+      @if (editingId) {
+        <button nz-button (click)="cancelEdit()">Cancel</button>
+      }
+      <button nz-button nzDanger (click)="clear()" [disabled]="!graph && !structureName">Clear</button>
+    </div>
+  </nz-card>
+
+  <nz-card nzTitle="Saved Structures" class="mt-24">
+    <nz-spin [nzSpinning]="loading">
+      <nz-table #structureTable [nzData]="structures" [nzShowPagination]="structures.length > 10"
+        nzSize="small" [nzNoResult]="'No saved structures yet.'">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Created By</th>
+            <th>Created</th>
+            <th nzWidth="150px">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (s of structureTable.data; track s) {
+            <tr>
+              <td>{{ s.name }}</td>
+              <td>{{ s.user?.firstName }} {{ s.user?.lastName }}</td>
+              <td>{{ s.createdAt | date:'short' }}</td>
+              <td>
+                <button nz-button nzType="link" nzSize="small" (click)="loadStructure(s)">Load</button>
+                <button nz-button nzType="link" nzDanger nzSize="small"
+                  nz-popconfirm nzPopconfirmTitle="Delete this structure?"
+                (nzOnConfirm)="deleteStructure(s.id!)">Delete</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </nz-table>
+    </nz-spin>
+  </nz-card>
+</div>

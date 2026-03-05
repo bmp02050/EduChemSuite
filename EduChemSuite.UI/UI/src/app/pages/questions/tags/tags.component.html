@@ -1,0 +1,46 @@
+<div class="page-container">
+  <nz-card nzTitle="Tags">
+    <div style="margin-bottom: 16px; display: flex; gap: 8px; align-items: center;">
+      <input nz-input placeholder="New tag" [(ngModel)]="newTagText" style="max-width: 300px;" />
+      <button nz-button nzType="primary" (click)="addTag()" [disabled]="!newTagText.trim()">Add Tag</button>
+    </div>
+    <nz-spin [nzSpinning]="loading">
+      <nz-table #tagTable [nzData]="tags" [nzShowPagination]="tags.length > 10" nzSize="small"
+        [nzScroll]="{ x: '400px' }">
+        <thead>
+          <tr>
+            <th>Tag</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (tag of tagTable.data; track tag) {
+            <tr>
+              <td>
+                @if (editingId !== tag.id) {
+                  <span>{{ tag.tagText }}</span>
+                }
+                @if (editingId === tag.id) {
+                  <input nz-input [(ngModel)]="editTagText" />
+                }
+              </td>
+              <td>
+                @if (editingId !== tag.id) {
+                  <button nz-button nzType="text" nzSize="small" (click)="startEdit(tag)" nz-tooltip nzTooltipTitle="Edit">
+                    <span nz-icon nzType="edit"></span>
+                  </button>
+                }
+                @if (editingId === tag.id) {
+                  <button nz-button nzType="link" (click)="saveEdit(tag)">Save</button>
+                }
+                @if (editingId === tag.id) {
+                  <button nz-button nzType="link" (click)="cancelEdit()">Cancel</button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </nz-table>
+    </nz-spin>
+  </nz-card>
+</div>

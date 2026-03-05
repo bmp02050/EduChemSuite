@@ -1,0 +1,29 @@
+<div class="page-container-narrow">
+  <nz-card nzTitle="Create Exam">
+    <form nz-form [formGroup]="examForm" (ngSubmit)="onSubmit()" nzLayout="vertical">
+      <nz-form-item>
+        <nz-form-label nzRequired>Name</nz-form-label>
+        <nz-form-control nzErrorTip="Exam name is required">
+          <input nz-input formControlName="name" placeholder="Enter exam name" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label>Description</nz-form-label>
+        <nz-form-control>
+          <textarea nz-input formControlName="description" placeholder="Enter exam description (optional)" rows="4"></textarea>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label>Is Test Exam</nz-form-label>
+        <nz-form-control nzExtra="Test exams can be taken by teachers without needing an assignment">
+          <nz-switch formControlName="isTest"></nz-switch>
+        </nz-form-control>
+      </nz-form-item>
+
+      <button nz-button nzType="primary" type="submit" [disabled]="!examForm.valid">Create Exam</button>
+      <button nz-button type="button" routerLink="/exams" style="margin-left: 8px;">Cancel</button>
+    </form>
+  </nz-card>
+</div>

@@ -1,0 +1,120 @@
+<div class="page-container-wide">
+  <nz-card nzTitle="User Details">
+    <nz-spin [nzSpinning]="loading">
+      @if (user) {
+        <div>
+          <nz-descriptions nzBordered [nzColumn]="2" nzSize="small">
+            <nz-descriptions-item nzTitle="Name">{{ user.firstName }} {{ user.lastName }}</nz-descriptions-item>
+            <nz-descriptions-item nzTitle="Email">{{ user.email }}</nz-descriptions-item>
+            <nz-descriptions-item nzTitle="Account Type">
+              @if (canChangeAccountType) {
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <nz-select
+                    [(ngModel)]="selectedAccountType"
+                    style="width: 180px;"
+                    [nzOptions]="assignableAccountTypes">
+                  </nz-select>
+                  <button nz-button nzType="primary" nzSize="small"
+                    (click)="saveAccountType()"
+                    [disabled]="selectedAccountType === user.accountType || savingAccountType"
+                    [nzLoading]="savingAccountType">
+                    Save
+                  </button>
+                </div>
+              } @else {
+                <nz-tag nzColor="blue">{{ getAccountTypeLabel(user.accountType) }}</nz-tag>
+              }
+            </nz-descriptions-item>
+            <nz-descriptions-item nzTitle="Status">
+              <nz-tag [nzColor]="user.isActive ? 'green' : 'default'">{{ user.isActive ? 'Active' : 'Inactive' }}</nz-tag>
+            </nz-descriptions-item>
+          </nz-descriptions>
+        </div>
+      }
+    </nz-spin>
+  </nz-card>
+
+  @if (user) {
+    <nz-card nzTitle="School Assignments" class="mt-24">
+      <div class="mb-16" style="display: flex; gap: 8px; align-items: center;">
+        <nz-select
+          [(ngModel)]="selectedSchoolId"
+          nzPlaceHolder="Select a school to add"
+          nzShowSearch
+          nzAllowClear
+          style="width: 300px;"
+          [nzOptions]="schoolOptions">
+        </nz-select>
+        <button nz-button nzType="primary" (click)="addToSchool()"
+          [disabled]="!selectedSchoolId || addingSchool" [nzLoading]="addingSchool">
+          Add to School
+        </button>
+      </div>
+      <nz-table #schoolsTable [nzData]="user.userSchools || []" nzSize="small" [nzShowPagination]="false">
+        <thead>
+          <tr>
+            <th>School Name</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (us of schoolsTable.data; track us) {
+            <tr>
+              <td>{{ us.school?.name || us.schoolId }}</td>
+              <td>
+                <a nz-popconfirm nzPopconfirmTitle="Remove from this school?" (nzOnConfirm)="removeFromSchool(us.schoolId || us.school?.id!)">
+                  Remove
+                </a>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </nz-table>
+    </nz-card>
+  }
+
+  @if (user) {
+    <nz-card nzTitle="District Assignments" class="mt-24">
+      <div class="mb-16" style="display: flex; gap: 8px; align-items: center;">
+        <nz-select
+          [(ngModel)]="selectedDistrictId"
+          nzPlaceHolder="Select a district to add"
+          nzShowSearch
+          nzAllowClear
+          style="width: 300px;"
+          [nzOptions]="districtOptions">
+        </nz-select>
+        <button nz-button nzType="primary" (click)="addToDistrict()"
+          [disabled]="!selectedDistrictId || addingDistrict" [nzLoading]="addingDistrict">
+          Add to District
+        </button>
+      </div>
+      <nz-table #districtsTable [nzData]="user.userDistricts || []" nzSize="small" [nzShowPagination]="false">
+        <thead>
+          <tr>
+            <th>District Name</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (ud of districtsTable.data; track ud) {
+            <tr>
+              <td>{{ ud.district?.districtName || ud.districtId }}</td>
+              <td>
+                <a nz-popconfirm nzPopconfirmTitle="Remove from this district?" (nzOnConfirm)="removeFromDistrict(ud.districtId || ud.district?.id!)">
+                  Remove
+                </a>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </nz-table>
+    </nz-card>
+  }
+
+  @if (user) {
+    <div class="mt-24">
+      <button nz-button routerLink="/users">Back to Users</button>
+    </div>
+  }
+</div>

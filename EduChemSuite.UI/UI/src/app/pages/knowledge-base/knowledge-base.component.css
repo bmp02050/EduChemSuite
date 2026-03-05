@@ -1,0 +1,141 @@
+.kb-layout {
+  min-height: calc(100vh - 64px);
+  background: var(--app-content-bg, #fff);
+}
+
+.kb-sider {
+  background: var(--app-bg, #fff);
+  border-right: 1px solid var(--app-border, #f0f0f0);
+  overflow-y: auto;
+}
+
+.kb-sider .ant-menu {
+  border-right: none;
+}
+
+.kb-content {
+  padding: 24px 32px;
+  max-width: 860px;
+  overflow-y: auto;
+}
+
+.kb-content h1 {
+  margin-bottom: 16px;
+  font-size: 28px;
+}
+
+.kb-content h2 {
+  margin-top: 32px;
+  margin-bottom: 12px;
+  font-size: 22px;
+}
+
+.kb-content h3 {
+  margin-top: 24px;
+  margin-bottom: 8px;
+  font-size: 18px;
+}
+
+.kb-content p, .kb-content li {
+  line-height: 1.7;
+  margin-bottom: 8px;
+}
+
+.kb-content ol, .kb-content ul {
+  padding-left: 24px;
+  margin-bottom: 16px;
+}
+
+.kb-content nz-table {
+  margin: 16px 0;
+}
+
+.kb-content .note {
+  margin: 16px 0;
+}
+
+.kb-content .quick-links a {
+  display: inline-block;
+  margin: 4px 8px 4px 0;
+  cursor: pointer;
+  color: var(--ant-primary-color, #1890ff);
+}
+
+.kb-content .quick-links a:hover {
+  text-decoration: underline;
+}
+
+/* Chemistry Tools Showcase */
+.tools-intro {
+  font-size: 15px;
+  margin-bottom: 24px;
+  max-width: 700px;
+}
+
+.tool-showcase-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 28px;
+  margin-top: 24px;
+  margin-bottom: 32px;
+}
+
+.tool-showcase-card {
+  border: 1px solid var(--app-border, #f0f0f0);
+  border-radius: 8px;
+  padding: 20px 24px;
+  background: var(--app-content-bg);
+  transition: box-shadow 0.2s;
+}
+
+.tool-showcase-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+
+.tool-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.tool-card-header h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.feature-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0 16px;
+}
+
+.tool-embed-frame {
+  border: 1px solid var(--app-border, #e8e8e8);
+  border-radius: 6px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  background: #fff;
+  display: flex;
+  justify-content: center;
+  padding: 8px;
+  min-height: 200px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+
+@media (max-width: 768px) {
+  .kb-sider {
+    display: none;
+  }
+  .kb-content {
+    padding: 16px;
+  }
+
+  .tool-showcase-grid {
+    gap: 16px;
+  }
+}

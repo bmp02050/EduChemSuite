@@ -1,0 +1,15 @@
+# /etc/netplan/00-installer-config.yaml on Caddy Proxy VM
+# Apply with: sudo netplan apply
+network:
+  version: 2
+  ethernets:
+    eth0:
+      addresses:
+        - 192.168.100.3/24
+      routes:
+        - to: default
+          via: 192.168.100.254
+      nameservers:
+        addresses:
+          - 8.8.8.8
+          - 8.8.4.4

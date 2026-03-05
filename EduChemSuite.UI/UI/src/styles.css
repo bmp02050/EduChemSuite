@@ -1,0 +1,170 @@
+/* You can add global styles to this file, and also import other style files */
+
+/* ── Dark mode CSS variables ─────────────────────────────────── */
+
+body {
+  --app-bg: #fff;
+  --app-header-bg: #fff;
+  --app-content-bg: #fff;
+  --app-text: rgba(0, 0, 0, 0.85);
+  --app-border: #f0f0f0;
+  --app-shadow: rgba(0, 21, 41, 0.08);
+
+  --tool-bg: #fff;
+  --tool-bg-secondary: #fafafa;
+  --tool-bg-hover: #e6f7ff;
+  --tool-text: #333;
+  --tool-text-secondary: #666;
+  --tool-text-muted: #999;
+  --tool-border: #dee2e6;
+  --tool-border-light: #f0f0f0;
+  --tool-input-border: #d9d9d9;
+}
+
+body.dark-theme {
+  --app-bg: #141414;
+  --app-header-bg: #1f1f1f;
+  --app-content-bg: #1f1f1f;
+  --app-text: rgba(255, 255, 255, 0.85);
+  --app-border: #303030;
+  --app-shadow: rgba(0, 0, 0, 0.3);
+  background: #141414;
+  color: rgba(255, 255, 255, 0.85);
+
+  --tool-bg: #1f1f1f;
+  --tool-bg-secondary: #2a2a2a;
+  --tool-bg-hover: #111d2c;
+  --tool-text: rgba(255, 255, 255, 0.85);
+  --tool-text-secondary: rgba(255, 255, 255, 0.65);
+  --tool-text-muted: rgba(255, 255, 255, 0.45);
+  --tool-border: #434343;
+  --tool-border-light: #303030;
+  --tool-input-border: #434343;
+}
+
+/* ── Page containers ──────────────────────────────────────────── */
+
+/* Standard page padding for list/edit pages */
+.page-container {
+  padding: 24px;
+}
+
+/* Centered container for add/create forms */
+.page-container-narrow {
+  padding: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Wider container for edit pages with multiple cards */
+.page-container-wide {
+  padding: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Centered auth-style container */
+.page-container-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+}
+
+/* ── Card title styling ───────────────────────────────────────── */
+
+:host ::ng-deep .ant-card-head-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* ── Spacing helpers ──────────────────────────────────────────── */
+
+.mt-16 { margin-top: 16px; }
+.mt-24 { margin-top: 24px; }
+.mb-16 { margin-bottom: 16px; }
+.mb-24 { margin-bottom: 24px; }
+
+/* ── Stat cards ─────────────────────────────────────────────── */
+
+.stat-card .ant-card-body { padding: 16px 12px !important; text-align: center; }
+
+/* ── Softer, rounded UI ──────────────────────────────────────── */
+
+.ant-input,
+.ant-select-selector,
+.ant-input-affix-wrapper {
+  border-radius: 8px !important;
+}
+
+.ant-card {
+  border-radius: 12px !important;
+  overflow: hidden;
+}
+
+.ant-btn {
+  border-radius: 8px !important;
+}
+
+.ant-tag {
+  border-radius: 6px !important;
+}
+
+.ant-table {
+  border-radius: 8px !important;
+  overflow: hidden;
+}
+
+/* ── Mobile responsive ────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .page-container,
+  .page-container-narrow,
+  .page-container-wide {
+    padding: 12px;
+    max-width: 100%;
+  }
+
+  .page-container-center {
+    padding: 12px;
+    min-height: auto;
+  }
+
+  /* Make selects and inputs full width on mobile */
+  nz-select,
+  nz-input-number {
+    width: 100% !important;
+  }
+
+  /* Horizontal scroll for all tables */
+  .ant-table-wrapper {
+    overflow-x: auto;
+  }
+
+  .ant-table th,
+  .ant-table td {
+    white-space: nowrap;
+  }
+
+  /* Touch-friendly table buttons */
+  .ant-table a,
+  .ant-table button {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* Card headers wrap on mobile */
+  .ant-card-head {
+    flex-wrap: wrap;
+  }
+
+  .ant-card-head-wrapper {
+    flex-wrap: wrap;
+  }
+
+  .ant-card-extra {
+    margin-left: 0;
+    padding-top: 8px;
+  }
+}

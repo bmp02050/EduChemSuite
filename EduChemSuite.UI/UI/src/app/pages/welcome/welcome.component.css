@@ -1,0 +1,11 @@
+.mt-16 {
+  margin-top: 16px;
+}
+
+.mt-24 {
+  margin-top: 24px;
+}
+
+:host ::ng-deep nz-statistic .ant-statistic-content {
+  font-size: 28px;
+}

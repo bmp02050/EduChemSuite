@@ -1,0 +1,46 @@
+<div class="page-container">
+  <nz-card nzTitle="Question Types">
+    <div style="margin-bottom: 16px; display: flex; gap: 8px; align-items: center;">
+      <input nz-input placeholder="New question type description" [(ngModel)]="newDescription" style="max-width: 300px;" />
+      <button nz-button nzType="primary" (click)="addType()" [disabled]="!newDescription.trim()">Add Type</button>
+    </div>
+    <nz-spin [nzSpinning]="loading">
+      <nz-table #typeTable [nzData]="questionTypes" [nzShowPagination]="questionTypes.length > 10" nzSize="small"
+        [nzScroll]="{ x: '400px' }">
+        <thead>
+          <tr>
+            <th>Description</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (qt of typeTable.data; track qt) {
+            <tr>
+              <td>
+                @if (editingId !== qt.id) {
+                  <span>{{ qt.description }}</span>
+                }
+                @if (editingId === qt.id) {
+                  <input nz-input [(ngModel)]="editDescription" />
+                }
+              </td>
+              <td>
+                @if (editingId !== qt.id) {
+                  <button nz-button nzType="text" nzSize="small" (click)="startEdit(qt)" nz-tooltip nzTooltipTitle="Edit">
+                    <span nz-icon nzType="edit"></span>
+                  </button>
+                }
+                @if (editingId === qt.id) {
+                  <button nz-button nzType="link" (click)="saveEdit(qt)">Save</button>
+                }
+                @if (editingId === qt.id) {
+                  <button nz-button nzType="link" (click)="cancelEdit()">Cancel</button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </nz-table>
+    </nz-spin>
+  </nz-card>
+</div>

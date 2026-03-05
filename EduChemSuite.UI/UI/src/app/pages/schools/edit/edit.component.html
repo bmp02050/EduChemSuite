@@ -1,0 +1,107 @@
+<div class="page-container-wide">
+  <nz-card nzTitle="Edit School">
+    <nz-spin [nzSpinning]="loading">
+      <alert></alert>
+      @if (school) {
+        <form nz-form [formGroup]="schoolForm" (ngSubmit)="onSubmit()" nzLayout="vertical">
+          <nz-form-item>
+            <nz-form-label nzRequired>School Name</nz-form-label>
+            <nz-form-control nzErrorTip="School name is required">
+              <input nz-input formControlName="name" placeholder="Enter school name" />
+            </nz-form-control>
+          </nz-form-item>
+          <nz-form-item>
+            <nz-form-control>
+              <button nz-button nzType="primary" type="submit" [disabled]="!schoolForm.valid">Save Changes</button>
+              <button nz-button type="button" routerLink="/schools" style="margin-left: 8px;">Cancel</button>
+            </nz-form-control>
+          </nz-form-item>
+        </form>
+      }
+    </nz-spin>
+  </nz-card>
+
+  @if (school) {
+    <nz-card nzTitle="Staff" class="mt-24">
+      <div class="mb-16" style="display: flex; gap: 8px; align-items: center;">
+        <nz-select
+          [(ngModel)]="selectedStaffUserId"
+          [ngModelOptions]="{standalone: true}"
+          nzPlaceHolder="Select a staff member to add"
+          nzShowSearch
+          nzAllowClear
+          style="width: 300px;"
+          [nzOptions]="staffUserOptions">
+        </nz-select>
+        <button nz-button nzType="primary" (click)="addStaffMember()"
+          [disabled]="!selectedStaffUserId || addingStaff" [nzLoading]="addingStaff">
+          Add Staff
+        </button>
+      </div>
+      <nz-table #staffTable [nzData]="school.staff || []" nzSize="small" [nzShowPagination]="false">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of staffTable.data; track user) {
+            <tr>
+              <td>{{ user.firstName }} {{ user.lastName }}</td>
+              <td>{{ user.email }}</td>
+              <td>
+                <a nz-popconfirm nzPopconfirmTitle="Remove this staff member?" (nzOnConfirm)="removeStaffMember(user.id!)">
+                  Remove
+                </a>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </nz-table>
+    </nz-card>
+  }
+
+  @if (school) {
+    <nz-card nzTitle="Students" class="mt-24">
+      <div class="mb-16" style="display: flex; gap: 8px; align-items: center;">
+        <nz-select
+          [(ngModel)]="selectedStudentUserId"
+          [ngModelOptions]="{standalone: true}"
+          nzPlaceHolder="Select a student to add"
+          nzShowSearch
+          nzAllowClear
+          style="width: 300px;"
+          [nzOptions]="studentUserOptions">
+        </nz-select>
+        <button nz-button nzType="primary" (click)="addStudent()"
+          [disabled]="!selectedStudentUserId || addingStudent" [nzLoading]="addingStudent">
+          Add Student
+        </button>
+      </div>
+      <nz-table #studentsTable [nzData]="school.students || []" nzSize="small" [nzShowPagination]="false">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of studentsTable.data; track user) {
+            <tr>
+              <td>{{ user.firstName }} {{ user.lastName }}</td>
+              <td>{{ user.email }}</td>
+              <td>
+                <a nz-popconfirm nzPopconfirmTitle="Remove this student?" (nzOnConfirm)="removeStudent(user.id!)">
+                  Remove
+                </a>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </nz-table>
+    </nz-card>
+  }
+</div>

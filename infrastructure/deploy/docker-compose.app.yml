@@ -1,0 +1,47 @@
+services:
+  api:
+    image: ghcr.io/bmp02050/educhemsuite/api:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    ports:
+      - "${API_PORT}:8080"
+    environment:
+      ConnectionStrings__dev: "host=postgres;Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};Database=${POSTGRES_DB};Port=5432;"
+      ASPNETCORE_ENVIRONMENT: Production
+      SKIP_AUTO_MIGRATE: "true"
+      Jwt__Issuer: ${JWT_ISSUER}
+      Jwt__Audience: ${JWT_AUDIENCE}
+      Jwt__Key: ${JWT_KEY}
+      FrontendUrl: ${FRONTEND_URL}
+      EmailSettings__SmtpServer: ${EMAIL_SMTP_SERVER:-smtp.gmail.com}
+      EmailSettings__SmtpPort: ${EMAIL_SMTP_PORT:-587}
+      EmailSettings__SmtpUser: ${EMAIL_SMTP_USER:-}
+      EmailSettings__SmtpPassword: ${EMAIL_SMTP_PASSWORD:-}
+      EmailSettings__EnableSsl: ${EMAIL_ENABLE_SSL:-true}
+      Seq__Url: "http://seq:5341"
+    networks:
+      - default
+      - educhemsuite
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/health/ready"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+
+  ui:
+    image: ghcr.io/bmp02050/educhemsuite/ui:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    ports:
+      - "${UI_PORT}:80"
+    networks:
+      - default
+      - educhemsuite
+    depends_on:
+      api:
+        condition: service_healthy
+
+networks:
+  default:
+  educhemsuite:
+    external: true
+    name: educhemsuite

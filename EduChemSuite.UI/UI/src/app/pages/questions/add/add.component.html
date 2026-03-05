@@ -1,0 +1,149 @@
+<div class="page-container-narrow">
+  <nz-card nzTitle="Add Question">
+    <form nz-form [formGroup]="questionForm" (ngSubmit)="onSubmit()" nzLayout="vertical">
+      <nz-form-item>
+        <nz-form-label nzRequired>Question Text</nz-form-label>
+        <nz-form-control nzErrorTip="Question text is required">
+          <textarea nz-input formControlName="questionText" placeholder="Enter question text" rows="4"></textarea>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label nzRequired>Question Type</nz-form-label>
+        <nz-form-control nzErrorTip="Question type is required">
+          <nz-select formControlName="questionTypeId" nzPlaceHolder="Select a question type"
+            [nzOptions]="questionTypeOptions">
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label>Tags</nz-form-label>
+        <nz-form-control>
+          <nz-select formControlName="tagIds" nzMode="multiple" nzPlaceHolder="Select tags"
+            [nzOptions]="tagOptions">
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Molecule Editor for Chemical Structure Drawing -->
+      @if (isChemicalStructure()) {
+        <nz-divider nzText="Correct Molecular Structure"></nz-divider>
+        @if (savedStructures.length > 0) {
+          <div style="margin-bottom: 16px; display: flex; gap: 8px; align-items: center;">
+            <nz-select [(ngModel)]="selectedStructureId" [ngModelOptions]="{standalone: true}"
+              nzPlaceHolder="Load from structure library" style="width: 300px;"
+              nzShowSearch nzAllowClear [nzOptions]="structureOptions">
+            </nz-select>
+            <button nz-button nzType="default" type="button" (click)="loadFromLibrary()" [disabled]="!selectedStructureId">Load</button>
+          </div>
+        }
+        <molecule-builder
+          [graph]="pendingMoleculeGraph"
+          [width]="800"
+          [height]="650"
+          (graphChange)="onMoleculeGraphChange($event)">
+        </molecule-builder>
+      }
+
+      <!-- Lewis Dot Structure Editor -->
+      @if (isLewisStructure()) {
+        <nz-divider nzText="Correct Lewis Dot Structure"></nz-divider>
+        <molecule-builder
+          [graph]="pendingMoleculeGraph"
+          [width]="800"
+          [height]="650"
+          (graphChange)="onMoleculeGraphChange($event)">
+        </molecule-builder>
+      }
+
+      <!-- Atomic Structure Editor (Bohr Model) -->
+      @if (isAtomicStructure()) {
+        <nz-divider nzText="Correct Atomic Structure (Bohr Model)"></nz-divider>
+        <atom-builder
+          [graph]="pendingAtomGraph"
+          [width]="800"
+          [height]="650"
+          (graphChange)="onAtomGraphChange($event)">
+        </atom-builder>
+      }
+
+      <!-- Chemical Equation Balancer -->
+      @if (isChemicalEquation()) {
+        <nz-divider nzText="Correct Balanced Equation"></nz-divider>
+        <equation-balancer
+          [graph]="pendingEquationGraph"
+          [showInput]="true"
+          [width]="800"
+          (graphChange)="onEquationGraphChange($event)">
+        </equation-balancer>
+      }
+
+      <!-- Electron Configuration -->
+      @if (isElectronConfig()) {
+        <nz-divider nzText="Correct Electron Configuration"></nz-divider>
+        <electron-config
+          [graph]="pendingElectronConfigGraph"
+          [showElementPicker]="true"
+          [width]="800"
+          (graphChange)="onElectronConfigGraphChange($event)">
+        </electron-config>
+      }
+
+      <!-- Periodic Table Quiz -->
+      @if (isPeriodicTable()) {
+        <nz-divider nzText="Periodic Table Quiz Configuration"></nz-divider>
+        <periodic-table-quiz
+          [graph]="pendingPeriodicTableGraph"
+          [showConfig]="true"
+          [width]="850"
+          (graphChange)="onPeriodicTableGraphChange($event)">
+        </periodic-table-quiz>
+      }
+
+      <!-- Stoichiometry Stepper -->
+      @if (isStoichiometry()) {
+        <nz-divider nzText="Correct Stoichiometry Problem"></nz-divider>
+        <stoichiometry-stepper
+          [graph]="pendingStoichiometryGraph"
+          [showConfig]="true"
+          [width]="850"
+          (graphChange)="onStoichiometryGraphChange($event)">
+        </stoichiometry-stepper>
+      }
+
+      <!-- Text Answers for non-tool types -->
+      @if (!isToolQuestion()) {
+        <nz-divider nzText="Answers"></nz-divider>
+        <nz-table #answerTable [nzData]="pendingAnswers" [nzShowPagination]="false" nzSize="small">
+          <thead>
+            <tr>
+              <th>Answer Text</th>
+              <th>Correct?</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (a of answerTable.data; track a; let i = $index) {
+              <tr>
+                <td>{{ a.answerText }}</td>
+                <td>{{ a.isCorrect ? 'Yes' : 'No' }}</td>
+                <td><button nz-button nzType="link" nzDanger (click)="removeAnswer(i)">Remove</button></td>
+              </tr>
+            }
+          </tbody>
+        </nz-table>
+        <div style="margin-top: 12px; display: flex; gap: 8px; align-items: center;">
+          <input nz-input placeholder="Answer text" [(ngModel)]="newAnswerText" [ngModelOptions]="{standalone: true}" style="max-width: 300px;" />
+          <label nz-checkbox [(ngModel)]="newAnswerIsCorrect" [ngModelOptions]="{standalone: true}">Correct</label>
+          <button nz-button nzType="default" type="button" (click)="addAnswer()" [disabled]="!newAnswerText.trim()">Add Answer</button>
+        </div>
+      }
+
+      <nz-divider></nz-divider>
+
+      <button nz-button nzType="primary" type="submit" [disabled]="!questionForm.valid">Create Question</button>
+      <button nz-button type="button" routerLink="/questions" style="margin-left: 8px;">Cancel</button>
+    </form>
+  </nz-card>
+</div>

@@ -1,0 +1,77 @@
+<div class="page-container">
+  <nz-card nzTitle="Grades">
+    <div style="margin-bottom: 16px;">
+      <nz-select [(ngModel)]="selectedExamId" (ngModelChange)="onExamChange($event)"
+        nzPlaceHolder="Select an exam" style="width: 400px;" nzShowSearch nzAllowClear
+        [nzLoading]="examsLoading" [nzOptions]="examOptions">
+      </nz-select>
+    </div>
+
+    @if (!selectedExamId) {
+      <div style="color: #999;">
+        <p>Select an exam to view grades.</p>
+      </div>
+    }
+
+    @if (selectedExamId && !loading && grades.length > 0) {
+      <div nz-row [nzGutter]="16" style="margin-bottom: 16px;">
+        <div nz-col [nzXs]="12" [nzSm]="6">
+          <nz-card class="stat-card">
+            <nz-statistic [nzValue]="stats.total" nzTitle="Total Grades"></nz-statistic>
+          </nz-card>
+        </div>
+        <div nz-col [nzXs]="12" [nzSm]="6">
+          <nz-card class="stat-card">
+            <nz-statistic [nzValue]="stats.avg" nzTitle="Average" [nzSuffix]="'%'"></nz-statistic>
+          </nz-card>
+        </div>
+        <div nz-col [nzXs]="12" [nzSm]="6">
+          <nz-card class="stat-card">
+            <nz-statistic [nzValue]="stats.highest" nzTitle="Highest" [nzSuffix]="'%'"></nz-statistic>
+          </nz-card>
+        </div>
+        <div nz-col [nzXs]="12" [nzSm]="6">
+          <nz-card class="stat-card">
+            <nz-statistic [nzValue]="stats.lowest" nzTitle="Lowest" [nzSuffix]="'%'"></nz-statistic>
+          </nz-card>
+        </div>
+      </div>
+    }
+
+    @if (selectedExamId) {
+      <nz-spin [nzSpinning]="loading">
+        @if (!loading && grades.length === 0) {
+          <nz-empty nzNotFoundContent="No grades found for this exam"></nz-empty>
+        }
+        <nz-table #gradeTable [nzData]="grades" [nzShowPagination]="grades.length > 10" nzSize="small" [nzScroll]="{ x: '700px' }">
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Exam</th>
+              <th>Grade</th>
+              <th>Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (grade of gradeTable.data; track grade) {
+              <tr>
+                <td>{{ grade.user?.firstName }} {{ grade.user?.lastName }}</td>
+                <td>{{ getExamName(grade.examId) }}</td>
+                <td>{{ grade.gradeValue }}</td>
+                <td>{{ grade.createdAt | date:'short' }}</td>
+                <td>
+                  <a nz-button nzType="text" nzSize="small" [routerLink]="'/exams/review/' + grade.examId" nz-tooltip nzTooltipTitle="Review"><span nz-icon nzType="eye"></span></a>
+                  <button nz-button nzType="text" nzDanger nzSize="small"
+                    nz-popconfirm nzPopconfirmTitle="Are you sure you want to delete this grade?"
+                    (nzOnConfirm)="deleteGrade(grade.id!)"
+                    nz-tooltip nzTooltipTitle="Delete"><span nz-icon nzType="delete"></span></button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </nz-table>
+      </nz-spin>
+    }
+  </nz-card>
+</div>

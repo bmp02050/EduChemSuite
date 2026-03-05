@@ -1,0 +1,72 @@
+<div class="page-container-wide">
+  <nz-card nzTitle="My Exams">
+    <nz-spin [nzSpinning]="loading">
+      @if (!loading && exams.length > 0) {
+        <div nz-row [nzGutter]="16" style="margin-bottom: 16px;">
+          <div nz-col [nzXs]="12" [nzSm]="6">
+            <nz-card class="stat-card">
+              <nz-statistic [nzValue]="stats.assigned" nzTitle="Assigned"></nz-statistic>
+            </nz-card>
+          </div>
+          <div nz-col [nzXs]="12" [nzSm]="6">
+            <nz-card class="stat-card">
+              <nz-statistic [nzValue]="stats.completed" nzTitle="Completed"></nz-statistic>
+            </nz-card>
+          </div>
+          <div nz-col [nzXs]="12" [nzSm]="6">
+            <nz-card class="stat-card">
+              <nz-statistic [nzValue]="stats.pending" nzTitle="Pending"></nz-statistic>
+            </nz-card>
+          </div>
+          <div nz-col [nzXs]="12" [nzSm]="6">
+            <nz-card class="stat-card">
+              <nz-statistic [nzValue]="stats.avgGrade" nzTitle="Avg Grade" [nzSuffix]="'%'"></nz-statistic>
+            </nz-card>
+          </div>
+        </div>
+      }
+      @if (!loading && exams.length === 0) {
+        <nz-empty nzNotFoundContent="No exams assigned to you yet"></nz-empty>
+      }
+      @if (exams.length > 0) {
+        <nz-table #examTable [nzData]="exams" [nzShowPagination]="false" nzSize="small" [nzScroll]="{ x: '800px' }">
+          <thead>
+            <tr>
+              <th>Exam</th>
+              <th>Questions</th>
+              <th>Time Limit</th>
+              <th>Status</th>
+              <th>Grade</th>
+              <th>Attempts</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (e of examTable.data; track e) {
+              <tr>
+                <td>{{ e.exam?.name }}</td>
+                <td>{{ e.exam?.questionCount }}</td>
+                <td>{{ e.exam?.timeLimitMinutes ? e.exam.timeLimitMinutes + ' min' : 'No limit' }}</td>
+                <td>
+                  <nz-tag [nzColor]="getStatusColor(e.status)">{{ e.status }}</nz-tag>
+                </td>
+                <td>{{ e.latestGrade != null ? e.latestGrade + '%' : '-' }}</td>
+                <td>{{ e.attemptCount }} / {{ e.exam?.maxAttempts }}</td>
+                <td>
+                  @if (canTakeExam(e)) {
+                    <button nz-button nzType="primary" nzSize="small"
+                    [routerLink]="['/student-exams/take', e.examId]">{{ getTakeButtonLabel(e) }}</button>
+                  }
+                  @if (e.attemptCount > 0) {
+                    <button nz-button nzType="default" nzSize="small"
+                    [routerLink]="['/student-exams/result', e.examId]" style="margin-left: 4px;">View Result</button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </nz-table>
+      }
+    </nz-spin>
+  </nz-card>
+</div>

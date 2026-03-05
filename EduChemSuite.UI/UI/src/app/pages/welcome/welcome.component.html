@@ -1,0 +1,312 @@
+<div class="page-container">
+  <nz-card nzTitle="Dashboard">
+    @if (loading) {
+      <nz-spin nzTip="Loading..."></nz-spin>
+    }
+
+    <!-- Welcome Header (all roles) -->
+    @if (!loading && dashboard) {
+      <div>
+        <h2>Welcome, {{ displayName }}!</h2>
+        <nz-tag [nzColor]="roleColor">{{ roleLabel }}</nz-tag>
+        <!-- ============ ADMIN DASHBOARD ============ -->
+        @if (dashboard.admin; as admin) {
+          <div nz-row [nzGutter]="16" class="mt-24">
+            @for (stat of [
+              { value: admin.totalDistricts, title: 'Districts' },
+              { value: admin.totalSchools, title: 'Schools' },
+              { value: admin.totalUsers, title: 'Users' },
+              { value: admin.totalExams, title: 'Exams' },
+              { value: admin.totalQuestions, title: 'Questions' }
+              ]; track stat) {
+              <div nz-col [nzLg]="4" [nzMd]="8" [nzXs]="12">
+                <nz-card><nz-statistic [nzValue]="stat.value" [nzTitle]="stat.title"></nz-statistic></nz-card>
+              </div>
+            }
+          </div>
+          <div nz-row [nzGutter]="16" class="mt-16">
+            <div nz-col [nzSpan]="14" [nzXs]="24">
+              <nz-card nzTitle="Recent Exams">
+                <nz-table #adminExamTable [nzData]="admin.recentExams" [nzShowPagination]="false" nzSize="small">
+                  <thead><tr>
+                    <th>Name</th>
+                    <th>Questions</th>
+                    <th>Grades</th>
+                    <th>Created</th>
+                  </tr></thead>
+                  <tbody>
+                    @for (exam of adminExamTable.data; track exam) {
+                      <tr>
+                        <td><a [routerLink]="['/exams/edit', exam.id]">{{ exam.name }}</a></td>
+                        <td>{{ exam.questionCount }}</td>
+                        <td>{{ exam.gradeCount }}</td>
+                        <td>{{ exam.createdAt | date:'mediumDate' }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </nz-table>
+              </nz-card>
+            </div>
+            <div nz-col [nzSpan]="10" [nzXs]="24">
+              <nz-card nzTitle="Quick Actions">
+                <p><a routerLink="/districts">Manage Districts</a></p>
+                <p><a routerLink="/schools">Manage Schools</a></p>
+                <p><a routerLink="/users">Manage Users</a></p>
+                <p><a routerLink="/exams/add">Create Exam</a></p>
+                <p><a routerLink="/questions">Browse Questions</a></p>
+              </nz-card>
+            </div>
+          </div>
+        }
+        <!-- ============ ADMIN STAFF DASHBOARD ============ -->
+        @if (dashboard.adminStaff; as adminStaff) {
+          <div nz-row [nzGutter]="16" class="mt-24">
+            <div nz-col [nzSpan]="8" [nzXs]="12">
+              <nz-card><nz-statistic [nzValue]="adminStaff.districts.length" nzTitle="My Districts"></nz-statistic></nz-card>
+            </div>
+            <div nz-col [nzSpan]="8" [nzXs]="12">
+              <nz-card><nz-statistic [nzValue]="adminStaff.totalSchools" nzTitle="Total Schools"></nz-statistic></nz-card>
+            </div>
+            <div nz-col [nzSpan]="8" [nzXs]="12">
+              <nz-card><nz-statistic [nzValue]="adminStaff.totalUsers" nzTitle="Total Users"></nz-statistic></nz-card>
+            </div>
+          </div>
+          <div nz-row [nzGutter]="16" class="mt-16">
+            <div nz-col [nzSpan]="14" [nzXs]="24">
+              <nz-card nzTitle="My Districts">
+                <nz-table #districtTable [nzData]="adminStaff.districts" [nzShowPagination]="false" nzSize="small">
+                  <thead><tr>
+                    <th>District</th>
+                    <th>Schools</th>
+                    <th>Users</th>
+                  </tr></thead>
+                  <tbody>
+                    @for (d of districtTable.data; track d) {
+                      <tr>
+                        <td><a [routerLink]="['/districts/edit', d.id]">{{ d.name }}</a></td>
+                        <td>{{ d.schoolCount }}</td>
+                        <td>{{ d.userCount }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </nz-table>
+              </nz-card>
+            </div>
+            <div nz-col [nzSpan]="10" [nzXs]="24">
+              <nz-card nzTitle="Quick Actions">
+                <p><a routerLink="/districts">View Districts</a></p>
+                <p><a routerLink="/users">Manage Users</a></p>
+                <p><a routerLink="/account/register">Register User</a></p>
+                <p><a routerLink="/questions">Browse Questions</a></p>
+              </nz-card>
+            </div>
+          </div>
+          @if (adminStaff.recentExams.length > 0) {
+            <nz-card nzTitle="Recent Exams" class="mt-16">
+              <nz-table #adminStaffExamTable [nzData]="adminStaff.recentExams" [nzShowPagination]="false" nzSize="small">
+                <thead><tr>
+                  <th>Name</th>
+                  <th>Questions</th>
+                  <th>Grades</th>
+                  <th>Created</th>
+                </tr></thead>
+                <tbody>
+                  @for (exam of adminStaffExamTable.data; track exam) {
+                    <tr>
+                      <td><a [routerLink]="['/exams/edit', exam.id]">{{ exam.name }}</a></td>
+                      <td>{{ exam.questionCount }}</td>
+                      <td>{{ exam.gradeCount }}</td>
+                      <td>{{ exam.createdAt | date:'mediumDate' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </nz-table>
+            </nz-card>
+          }
+        }
+        <!-- ============ STAFF DASHBOARD ============ -->
+        @if (dashboard.staff; as staff) {
+          <div nz-row [nzGutter]="16" class="mt-24">
+            <div nz-col [nzSpan]="6" [nzXs]="12">
+              <nz-card><nz-statistic [nzValue]="staff.schools.length" nzTitle="My Schools"></nz-statistic></nz-card>
+            </div>
+            <div nz-col [nzSpan]="6" [nzXs]="12">
+              <nz-card><nz-statistic [nzValue]="staff.totalStudents" nzTitle="Total Students"></nz-statistic></nz-card>
+            </div>
+            <div nz-col [nzSpan]="6" [nzXs]="12">
+              <nz-card><nz-statistic [nzValue]="staff.myExams" nzTitle="My Exams"></nz-statistic></nz-card>
+            </div>
+            <div nz-col [nzSpan]="6" [nzXs]="12">
+              <nz-card><nz-statistic [nzValue]="staff.myQuestions" nzTitle="My Questions"></nz-statistic></nz-card>
+            </div>
+          </div>
+          <!-- Pending Review Alert -->
+          @if (staff.pendingReview.length > 0) {
+            <div class="mt-16">
+              <nz-card nzTitle="Pending Review">
+                <nz-table #pendingTable [nzData]="staff.pendingReview" [nzShowPagination]="false" nzSize="small">
+                  <thead><tr>
+                    <th>Exam</th>
+                    <th>Pending Responses</th>
+                  </tr></thead>
+                  <tbody>
+                    @for (p of pendingTable.data; track p) {
+                      <tr>
+                        <td><a [routerLink]="['/exams/edit', p.examId]">{{ p.examName }}</a></td>
+                        <td><nz-tag nzColor="orange">{{ p.pendingCount }} pending</nz-tag></td>
+                      </tr>
+                    }
+                  </tbody>
+                </nz-table>
+              </nz-card>
+            </div>
+          }
+          <div nz-row [nzGutter]="16" class="mt-16">
+            <div nz-col [nzSpan]="14" [nzXs]="24">
+              <nz-card nzTitle="My Schools">
+                @if (staff.schools.length > 0) {
+                  <nz-table #schoolTable [nzData]="staff.schools" [nzShowPagination]="false" nzSize="small">
+                    <thead><tr>
+                      <th>School</th>
+                      <th>Students</th>
+                      <th>Staff</th>
+                    </tr></thead>
+                    <tbody>
+                      @for (s of schoolTable.data; track s) {
+                        <tr>
+                          <td><a [routerLink]="['/schools/edit', s.id]">{{ s.name }}</a></td>
+                          <td>{{ s.studentCount }}</td>
+                          <td>{{ s.staffCount }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </nz-table>
+                }
+                @if (staff.schools.length === 0) {
+                  <nz-empty nzNotFoundContent="Not assigned to any schools"></nz-empty>
+                }
+              </nz-card>
+            </div>
+            <div nz-col [nzSpan]="10" [nzXs]="24">
+              <nz-card nzTitle="Quick Actions">
+                <p><a routerLink="/exams/add">Create Exam</a></p>
+                <p><a routerLink="/questions/add">Add Question</a></p>
+                <p><a routerLink="/questions">Browse Questions</a></p>
+                <p><a routerLink="/exams">View My Exams</a></p>
+              </nz-card>
+            </div>
+          </div>
+          @if (staff.recentExams.length > 0) {
+            <nz-card nzTitle="Recent Exams" class="mt-16">
+              <nz-table #staffExamTable [nzData]="staff.recentExams" [nzShowPagination]="false" nzSize="small">
+                <thead><tr>
+                  <th>Name</th>
+                  <th>Questions</th>
+                  <th>Grades</th>
+                  <th>Created</th>
+                </tr></thead>
+                <tbody>
+                  @for (exam of staffExamTable.data; track exam) {
+                    <tr>
+                      <td><a [routerLink]="['/exams/edit', exam.id]">{{ exam.name }}</a></td>
+                      <td>{{ exam.questionCount }}</td>
+                      <td>{{ exam.gradeCount }}</td>
+                      <td>{{ exam.createdAt | date:'mediumDate' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </nz-table>
+            </nz-card>
+          }
+        }
+        <!-- ============ STUDENT DASHBOARD ============ -->
+        @if (dashboard.student; as student) {
+          <div nz-row [nzGutter]="16" class="mt-24">
+            <div nz-col [nzSpan]="8" [nzXs]="12">
+              <nz-card><nz-statistic [nzValue]="student.overallAverage + '%'" nzTitle="Overall Average"></nz-statistic></nz-card>
+            </div>
+            <div nz-col [nzSpan]="8" [nzXs]="12">
+              <nz-card><nz-statistic [nzValue]="student.assignedExams.length" nzTitle="Assigned Exams"></nz-statistic></nz-card>
+            </div>
+            <div nz-col [nzSpan]="8" [nzXs]="12">
+              <nz-card><nz-statistic [nzValue]="completedExamCount" nzTitle="Completed Exams"></nz-statistic></nz-card>
+            </div>
+          </div>
+          <div nz-row [nzGutter]="16" class="mt-16">
+            <div nz-col [nzSpan]="14" [nzXs]="24">
+              <nz-card nzTitle="Assigned Exams">
+                @if (student.assignedExams.length > 0) {
+                  <nz-table #assignedTable [nzData]="student.assignedExams" [nzShowPagination]="false" nzSize="small">
+                    <thead><tr>
+                      <th>Exam</th>
+                      <th>Status</th>
+                      <th>Grade</th>
+                    </tr></thead>
+                    <tbody>
+                      @for (a of assignedTable.data; track a) {
+                        <tr>
+                          <td>
+                            @if (!a.isCompleted) {
+                              <a [routerLink]="['/student-exams', a.examId]">{{ a.examName }}</a>
+                            }
+                            @if (a.isCompleted) {
+                              <a [routerLink]="['/student-exams/result', a.examId]">{{ a.examName }}</a>
+                            }
+                          </td>
+                          <td>
+                            <nz-tag [nzColor]="a.isCompleted ? 'green' : 'blue'">{{ a.isCompleted ? 'Completed' : 'Pending' }}</nz-tag>
+                          </td>
+                          <td>{{ a.grade != null ? (a.grade | number:'1.0-1') + '%' : '—' }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </nz-table>
+                }
+                @if (student.assignedExams.length === 0) {
+                  <nz-empty nzNotFoundContent="No exams assigned yet"></nz-empty>
+                }
+              </nz-card>
+            </div>
+            <div nz-col [nzSpan]="10" [nzXs]="24">
+              <nz-card nzTitle="Recent Grades">
+                @if (student.recentGrades.length > 0) {
+                  <nz-table #gradeTable [nzData]="student.recentGrades" [nzShowPagination]="false" nzSize="small">
+                    <thead><tr>
+                      <th>Exam</th>
+                      <th>Grade</th>
+                      <th>Date</th>
+                    </tr></thead>
+                    <tbody>
+                      @for (g of gradeTable.data; track g) {
+                        <tr>
+                          <td><a [routerLink]="['/student-exams/result', g.examId]">{{ g.examName }}</a></td>
+                          <td>{{ g.gradeValue | number:'1.0-1' }}%</td>
+                          <td>{{ g.createdAt | date:'mediumDate' }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </nz-table>
+                }
+                @if (student.recentGrades.length === 0) {
+                  <nz-empty nzNotFoundContent="No grades yet"></nz-empty>
+                }
+              </nz-card>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Not logged in state -->
+    @if (!loading && !dashboard) {
+      <div>
+        <h2>Welcome to EduChemSuite</h2>
+        <p>Please <a routerLink="/account/login">log in</a> to view your dashboard.</p>
+        <p style="margin-top: 16px;">
+          <a routerLink="/knowledge-base" nz-button nzType="default">Browse Knowledge Base</a>
+          <a routerLink="/contact" nz-button nzType="default" style="margin-left: 8px;">Contact Us</a>
+        </p>
+      </div>
+    }
+  </nz-card>
+</div>

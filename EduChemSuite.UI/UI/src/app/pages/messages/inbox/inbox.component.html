@@ -1,0 +1,65 @@
+<div class="page-container">
+  <nz-card nzTitle="Inbox" [nzExtra]="inboxExtra">
+    @if (!loading && messages.length > 0) {
+      <div nz-row [nzGutter]="16" style="margin-bottom: 16px;">
+        <div nz-col [nzXs]="12" [nzMd]="6">
+          <nz-card><nz-statistic [nzValue]="stats.total" nzTitle="Total Messages"></nz-statistic></nz-card>
+        </div>
+        <div nz-col [nzXs]="12" [nzMd]="6">
+          <nz-card><nz-statistic [nzValue]="stats.unread" nzTitle="Unread"></nz-statistic></nz-card>
+        </div>
+      </div>
+    }
+    <nz-table #inboxTable [nzData]="messages" [nzLoading]="loading" nzSize="small"
+      [nzScroll]="{ x: '600px' }"
+      [nzShowPagination]="messages.length > 10" [nzPageSize]="10">
+      <thead>
+        <tr>
+          <th>From</th>
+          <th>Subject</th>
+          <th>Date</th>
+          <th nzWidth="80px">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (msg of inboxTable.data; track msg) {
+          <tr
+            [class.unread]="!msg.isRead"
+            class="clickable-row">
+            <td>
+              <a [routerLink]="['/messages/conversation', msg.conversationId]">
+                {{ msg.senderName }}
+              </a>
+              <nz-tag [nzColor]="'blue'" class="role-tag">{{ msg.senderAccountType }}</nz-tag>
+            </td>
+            <td>
+              <a [routerLink]="['/messages/conversation', msg.conversationId]"
+                [style.font-weight]="msg.isRead ? 'normal' : 'bold'">
+                {{ msg.subject }}
+              </a>
+            </td>
+            <td>{{ msg.createdAt | date:'short' }}</td>
+            <td>
+              <button nz-button nzType="text" nzDanger nzSize="small" (click)="deleteMessage(msg.id!, $event)"
+                nz-tooltip nzTooltipTitle="Delete">
+                <span nz-icon nzType="delete"></span>
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+    @if (!loading && messages.length === 0) {
+      <nz-empty nzNotFoundContent="No messages in your inbox"></nz-empty>
+    }
+  </nz-card>
+</div>
+
+<ng-template #inboxExtra>
+  <a routerLink="/messages/compose" nz-button nzType="primary" nzSize="small">
+    <span nz-icon nzType="edit"></span> Compose
+  </a>
+  <a routerLink="/messages/sent" nz-button nzSize="small" style="margin-left: 8px;">
+    Sent
+  </a>
+</ng-template>

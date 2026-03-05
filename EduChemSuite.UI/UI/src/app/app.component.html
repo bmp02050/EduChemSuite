@@ -1,0 +1,252 @@
+<ng-template #sidebarMenu>
+  <div class="sidebar-logo">
+    <a routerLink="/welcome" (click)="onMenuClick()">
+      <img src="assets/logo.svg" alt="EduChem Suite" />
+      <h1>EduChem Suite</h1>
+    </a>
+  </div>
+  <ul nz-menu nzTheme="dark" nzMode="inline" [nzInlineCollapsed]="!isMobile && isCollapsed">
+    <!-- Welcome: Everyone -->
+    <li nz-menu-item nzMatchRouter>
+      <span nz-icon nzType="home" nzTheme="outline"></span>
+      <span>
+        <a routerLink="/welcome" routerLinkActive="active-link"
+        [routerLinkActiveOptions]="{ exact: true }" (click)="onMenuClick()">Welcome</a>
+      </span>
+    </li>
+    <!-- Knowledge Base: Everyone -->
+    <li nz-menu-item nzMatchRouter>
+      <span nz-icon nzType="read" nzTheme="outline"></span>
+      <span>
+        <a routerLink="/knowledge-base" routerLinkActive="active-link" (click)="onMenuClick()">Knowledge Base</a>
+      </span>
+    </li>
+    <!-- Administration: Admin, AdminStaff only -->
+    @if (isLoggedIn && isElevatedUser()) {
+      <li nz-submenu nzTitle="Administration" nzIcon="bank">
+        <ul>
+          <li nz-menu-item nzMatchRouter>
+            <a routerLink="/districts" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" (click)="onMenuClick()">Districts</a>
+          </li>
+          <li nz-menu-item nzMatchRouter>
+            <a routerLink="/districts/add" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" (click)="onMenuClick()">Add District</a>
+          </li>
+          @if (isStaffOrAbove()) {
+            <li nz-menu-item nzMatchRouter>
+              <a routerLink="/schools" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" (click)="onMenuClick()">Schools</a>
+            </li>
+          }
+          <li nz-menu-item nzMatchRouter>
+            <a routerLink="/users" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" (click)="onMenuClick()">User List</a>
+          </li>
+          <li nz-menu-item nzMatchRouter>
+            <a routerLink="/users" [queryParams]="{accountType: 'Student'}" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" (click)="onMenuClick()">Students</a>
+          </li>
+          <li nz-menu-item nzMatchRouter>
+            <a routerLink="/account/register" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" (click)="onMenuClick()">Register User</a>
+          </li>
+        </ul>
+      </li>
+    }
+    <!-- Schools + Users for Staff (non-elevated) -->
+    @if (isLoggedIn && isStaffOrAbove() && !isElevatedUser()) {
+      <li nz-submenu nzTitle="Administration" nzIcon="bank">
+        <ul>
+          <li nz-menu-item nzMatchRouter>
+            <a routerLink="/schools" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" (click)="onMenuClick()">Schools</a>
+          </li>
+          <li nz-menu-item nzMatchRouter>
+            <a routerLink="/users" [queryParams]="{accountType: 'Student'}" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" (click)="onMenuClick()">Students</a>
+          </li>
+          <li nz-menu-item nzMatchRouter>
+            <a routerLink="/account/register" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" (click)="onMenuClick()">Register User</a>
+          </li>
+        </ul>
+      </li>
+    }
+    <!-- Assessments: All logged in -->
+    @if (isLoggedIn) {
+      <li nz-submenu nzTitle="Assessments" nzIcon="form">
+        <ul>
+          @if (isStaffOrAbove()) {
+            <li nz-menu-item nzMatchRouter>
+              <a routerLink="/exams" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" (click)="onMenuClick()">Manage Exams</a>
+            </li>
+          }
+          @if (isStaffOrAbove()) {
+            <li nz-menu-item nzMatchRouter>
+              <a routerLink="/exams/add" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" (click)="onMenuClick()">Create Exam</a>
+            </li>
+          }
+          @if (isStudent()) {
+            <li nz-menu-item nzMatchRouter>
+              <a routerLink="/student-exams" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" (click)="onMenuClick()">My Exams</a>
+            </li>
+          }
+          <li nz-menu-item nzMatchRouter>
+            <a routerLink="/grades" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" (click)="onMenuClick()">Grades</a>
+          </li>
+        </ul>
+      </li>
+    }
+    <!-- Content: Staff+ only -->
+    @if (isLoggedIn && isStaffOrAbove()) {
+      <li nz-submenu nzTitle="Content" nzIcon="book">
+        <ul>
+          <li nz-menu-item nzMatchRouter>
+            <a routerLink="/questions" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" (click)="onMenuClick()">Manage Questions</a>
+          </li>
+          <li nz-menu-item nzMatchRouter>
+            <a routerLink="/questions/add" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" (click)="onMenuClick()">Add Question</a>
+          </li>
+          @if (isElevatedUser()) {
+            <li nz-menu-item nzMatchRouter>
+              <a routerLink="/questions/types" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" (click)="onMenuClick()">Question Types</a>
+            </li>
+          }
+          @if (isElevatedUser()) {
+            <li nz-menu-item nzMatchRouter>
+              <a routerLink="/questions/tags" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" (click)="onMenuClick()">Tags</a>
+            </li>
+          }
+          <li nz-menu-item nzMatchRouter>
+            <a routerLink="/answers" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" (click)="onMenuClick()">Image Types</a>
+          </li>
+          <li nz-menu-item nzMatchRouter>
+            <a routerLink="/molecule-editor" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" (click)="onMenuClick()">Molecule Editor</a>
+          </li>
+        </ul>
+      </li>
+    }
+    <!-- Messages: All logged in users -->
+    @if (isLoggedIn) {
+      <li nz-submenu nzIcon="mail">
+        <span title>
+          Messages
+          <nz-badge [nzCount]="unreadCount" [nzOverflowCount]="99" class="menu-badge"></nz-badge>
+        </span>
+        <ul>
+          <li nz-menu-item nzMatchRouter>
+            <a routerLink="/messages" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" (click)="onMenuClick()">
+              Inbox
+              @if (unreadCount > 0) {
+                <nz-badge [nzCount]="unreadCount" [nzOverflowCount]="99" class="inbox-badge"></nz-badge>
+              }
+            </a>
+          </li>
+          <li nz-menu-item nzMatchRouter>
+            <a routerLink="/messages/compose" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" (click)="onMenuClick()">Compose</a>
+          </li>
+          <li nz-menu-item nzMatchRouter>
+            <a routerLink="/messages/sent" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" (click)="onMenuClick()">Sent</a>
+          </li>
+        </ul>
+      </li>
+    }
+    <!-- Data Management: Staff+ -->
+    @if (isLoggedIn && isStaffOrAbove()) {
+      <li nz-submenu nzTitle="Data" nzIcon="database">
+        <ul>
+          <li nz-menu-item nzMatchRouter>
+            <a routerLink="/data-management" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" (click)="onMenuClick()">Import &amp; Export</a>
+          </li>
+        </ul>
+      </li>
+    }
+    <!-- Account -->
+    <li nz-submenu nzTitle="Account" nzIcon="user">
+      @if (!isLoggedIn) {
+        <ul>
+          <li nz-menu-item nzMatchRouter>
+            <a routerLink="/account/login" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" (click)="onMenuClick()">Login</a>
+          </li>
+        </ul>
+      }
+      @if (isLoggedIn) {
+        <ul>
+          <li nz-menu-item nzMatchRouter>
+            <a routerLink="/account/profile" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" (click)="onMenuClick()">My Profile</a>
+          </li>
+          <li nz-menu-item nzMatchRouter>
+            <a routerLink="/account/logout" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" (click)="onMenuClick()">Logout</a>
+          </li>
+        </ul>
+      }
+    </li>
+  </ul>
+</ng-template>
+
+<nz-layout class="app-layout">
+  <!-- Desktop sidebar -->
+  @if (!isMobile) {
+    <nz-sider
+      class="menu-sidebar"
+      nzCollapsible
+      nzWidth="256px"
+      nzBreakpoint="md"
+      [(nzCollapsed)]="isCollapsed"
+      [nzTrigger]="null">
+      <ng-container *ngTemplateOutlet="sidebarMenu"></ng-container>
+    </nz-sider>
+  }
+
+  <!-- Mobile drawer -->
+  @if (isMobile) {
+    <nz-drawer
+      [nzVisible]="drawerVisible"
+      nzPlacement="left"
+      [nzClosable]="false"
+      [nzWidth]="256"
+      (nzOnClose)="drawerVisible = false"
+      nzWrapClassName="mobile-drawer">
+      <ng-container *nzDrawerContent>
+        <ng-container *ngTemplateOutlet="sidebarMenu"></ng-container>
+      </ng-container>
+    </nz-drawer>
+  }
+
+  <nz-layout class="content-layout" [class.sidebar-collapsed]="!isMobile && isCollapsed" [class.mobile-layout]="isMobile">
+    <nz-header>
+      <div class="app-header">
+        <span class="header-trigger" (click)="toggleSidebar()">
+          <span class="trigger"
+            nz-icon
+            [nzType]="isMobile ? 'menu' : (isCollapsed ? 'menu-unfold' : 'menu-fold')"
+          ></span>
+        </span>
+        <div class="header-right">
+          <!-- Dark mode toggle -->
+          <button nz-button nzType="text" (click)="toggleTheme()" class="header-action-btn">
+            <span nz-icon [nzType]="isDarkMode ? 'sun' : 'moon'" nzTheme="outline"></span>
+          </button>
+          <!-- User avatar dropdown -->
+          @if (isLoggedIn) {
+            <nz-dropdown-menu #userMenu="nzDropdownMenu">
+              <ul nz-menu>
+                <li nz-menu-item>
+                  <a routerLink="/account/profile" (click)="onMenuClick()">Profile</a>
+                </li>
+                <li nz-menu-divider></li>
+                <li nz-menu-item>
+                  <a routerLink="/account/logout" (click)="onMenuClick()">Logout</a>
+                </li>
+              </ul>
+            </nz-dropdown-menu>
+            <div nz-dropdown nzTrigger="click" [nzDropdownMenu]="userMenu" class="user-avatar-container">
+              <nz-avatar
+                nzText="{{avatarLabel}}"
+                [style.background-color]="'#13c2c2'"
+                class="user-avatar"
+              ></nz-avatar>
+            </div>
+          }
+        </div>
+      </div>
+    </nz-header>
+    <nz-content>
+      <div class="inner-content">
+        <router-outlet></router-outlet>
+      </div>
+    </nz-content>
+  </nz-layout>
+</nz-layout>

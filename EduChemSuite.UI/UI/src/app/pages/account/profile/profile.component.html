@@ -1,0 +1,181 @@
+<div class="page-container-wide">
+  <nz-card nzTitle="My Profile" [nzExtra]="editBtnTpl">
+    <alert></alert>
+
+    @if (loading) {
+      <nz-spin nzTip="Loading profile..."></nz-spin>
+    }
+
+    <!-- Read-only view -->
+    @if (!loading && user && !editing) {
+      <nz-descriptions nzBordered [nzColumn]="{ xxl: 2, xl: 2, lg: 2, md: 2, sm: 1, xs: 1 }">
+        <nz-descriptions-item nzTitle="First Name">{{ user.firstName }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Last Name">{{ user.lastName }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Email">{{ user.email }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Account Type">
+          <nz-tag [nzColor]="'blue'">{{ getAccountTypeLabel() }}</nz-tag>
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Email Verified">
+          <nz-tag [nzColor]="user.verifiedEmail ? 'green' : 'red'">{{ user.verifiedEmail ? 'Yes' : 'No' }}</nz-tag>
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Admin">
+          <nz-tag [nzColor]="user.isAdmin ? 'purple' : 'default'">{{ user.isAdmin ? 'Yes' : 'No' }}</nz-tag>
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Show Email to Others">
+          <nz-tag [nzColor]="user.showEmail ? 'green' : 'default'">{{ user.showEmail ? 'Yes' : 'No' }}</nz-tag>
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Dark Mode">
+          <nz-tag [nzColor]="user.preferDarkMode ? 'purple' : 'default'">{{ user.preferDarkMode ? 'On' : 'Off' }}</nz-tag>
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Phone">{{ user.phone || '-' }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Address">
+          {{ user.address1 || '-' }}
+          @if (user.address2) {
+            <span>, {{ user.address2 }}</span>
+          }
+          @if (user.address3) {
+            <span>, {{ user.address3 }}</span>
+          }
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="City">{{ user.city || '-' }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="State">{{ user.state || '-' }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Country">{{ user.country || '-' }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Zip">{{ user.zip || '-' }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Member Since">{{ user.createdAt | date:'mediumDate' }}</nz-descriptions-item>
+      </nz-descriptions>
+    }
+
+    <!-- Edit view -->
+    @if (!loading && user && editing) {
+      <form nz-form [formGroup]="form" (ngSubmit)="onSave()" nzLayout="vertical">
+        <div nz-row [nzGutter]="16">
+          <div nz-col [nzSpan]="12" [nzXs]="24">
+            <nz-form-item>
+              <nz-form-label nzRequired>First Name</nz-form-label>
+              <nz-form-control nzErrorTip="First name is required">
+                <input nz-input formControlName="firstName" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzSpan]="12" [nzXs]="24">
+            <nz-form-item>
+              <nz-form-label nzRequired>Last Name</nz-form-label>
+              <nz-form-control nzErrorTip="Last name is required">
+                <input nz-input formControlName="lastName" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+        <nz-form-item>
+          <nz-form-label nzRequired>Address Line 1</nz-form-label>
+          <nz-form-control nzErrorTip="Address is required">
+            <input nz-input formControlName="address1" />
+          </nz-form-control>
+        </nz-form-item>
+        <div nz-row [nzGutter]="16">
+          <div nz-col [nzSpan]="12" [nzXs]="24">
+            <nz-form-item>
+              <nz-form-label>Address Line 2</nz-form-label>
+              <nz-form-control>
+                <input nz-input formControlName="address2" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzSpan]="12" [nzXs]="24">
+            <nz-form-item>
+              <nz-form-label>Address Line 3</nz-form-label>
+              <nz-form-control>
+                <input nz-input formControlName="address3" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+        <div nz-row [nzGutter]="16">
+          <div nz-col [nzSpan]="6" [nzXs]="12">
+            <nz-form-item>
+              <nz-form-label nzRequired>City</nz-form-label>
+              <nz-form-control nzErrorTip="City is required">
+                <input nz-input formControlName="city" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzSpan]="6" [nzXs]="12">
+            <nz-form-item>
+              <nz-form-label nzRequired>State</nz-form-label>
+              <nz-form-control nzErrorTip="State is required">
+                <input nz-input formControlName="state" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzSpan]="6" [nzXs]="12">
+            <nz-form-item>
+              <nz-form-label nzRequired>Country</nz-form-label>
+              <nz-form-control nzErrorTip="Country is required">
+                <input nz-input formControlName="country" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzSpan]="6" [nzXs]="12">
+            <nz-form-item>
+              <nz-form-label nzRequired>Zip</nz-form-label>
+              <nz-form-control nzErrorTip="Zip code is required">
+                <input nz-input formControlName="zip" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+        <nz-form-item>
+          <nz-form-label nzRequired>Phone</nz-form-label>
+          <nz-form-control nzErrorTip="Phone is required">
+            <input nz-input formControlName="phone" />
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-label>Show Email to Others</nz-form-label>
+          <nz-form-control>
+            <nz-switch formControlName="showEmail" nzCheckedChildren="Visible" nzUnCheckedChildren="Hidden"></nz-switch>
+            <span style="margin-left: 8px; color: #999; font-size: 12px;">When enabled, other users can see your email address</span>
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-label>Dark Mode</nz-form-label>
+          <nz-form-control>
+            <nz-switch formControlName="preferDarkMode" nzCheckedChildren="Dark" nzUnCheckedChildren="Light"></nz-switch>
+            <span style="margin-left: 8px; color: #999; font-size: 12px;">Saved to your account and synced across devices</span>
+          </nz-form-control>
+        </nz-form-item>
+        <nz-divider nzText="Change Password (optional)"></nz-divider>
+        <div nz-row [nzGutter]="16">
+          <div nz-col [nzSpan]="12" [nzXs]="24">
+            <nz-form-item>
+              <nz-form-label>New Password</nz-form-label>
+              <nz-form-control>
+                <input nz-input formControlName="password" type="password" placeholder="Leave blank to keep current" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzSpan]="12" [nzXs]="24">
+            <nz-form-item>
+              <nz-form-label>Confirm Password</nz-form-label>
+              <nz-form-control>
+                <input nz-input formControlName="confirmPassword" type="password" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+        <nz-form-item>
+          <nz-form-control>
+            <button nz-button nzType="primary" [nzLoading]="saving" [disabled]="saving" type="submit">Save Changes</button>
+            <button nz-button nzType="default" type="button" (click)="toggleEdit()" style="margin-left: 8px;">Cancel</button>
+          </nz-form-control>
+        </nz-form-item>
+      </form>
+    }
+  </nz-card>
+
+  <ng-template #editBtnTpl>
+    @if (!editing && !loading && user) {
+      <button nz-button nzType="primary" (click)="toggleEdit()">Edit Profile</button>
+    }
+  </ng-template>
+</div>
