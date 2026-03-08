@@ -76,7 +76,7 @@ jobs:
             ghcr.io/${{ env.REPO }}/api:${{ github.sha }}
 
       - name: Scan API image for vulnerabilities
-        uses: aquasecurity/trivy-action@0.30.0
+        uses: aquasecurity/trivy-action@0.21.0
         with:
           image-ref: ghcr.io/${{ env.REPO }}/api:latest
           format: table
@@ -102,7 +102,7 @@ jobs:
             ghcr.io/${{ env.REPO }}/ui:${{ github.sha }}
 
       - name: Scan UI image for vulnerabilities
-        uses: aquasecurity/trivy-action@0.30.0
+        uses: aquasecurity/trivy-action@0.21.0
         with:
           image-ref: ghcr.io/${{ env.REPO }}/ui:latest
           format: table
