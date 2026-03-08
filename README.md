@@ -10,7 +10,7 @@ A chemistry education platform for creating, assigning, and grading exams, inclu
 | Component | Stack | Port |
 |-----------|-------|------|
 | **API** | .NET 9.0, EF Core, PostgreSQL | `localhost:5000` (dev) / `8080` (prod) |
-| **UI** | Angular 18, ng-zorro-antd | `localhost:4200` (dev) / `80` (prod) |
+| **UI** | Angular 21, ng-zorro-antd | `localhost:4200` (dev) / `80` (prod) |
 | **ML** | Python Flask (non-functional stub) | - |
 
 The API follows a **Controller > Service > Repository** pattern with AutoMapper for entity/model separation. The frontend uses standalone components with lazy-loaded routes.
