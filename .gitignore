@@ -348,3 +348,6 @@ ASALocalRun/
 # Claude Code
 CLAUDE.md
 .claude/
+
+# Infrastructure (template files only)
+infrastructure/caddy-proxy/Caddyfile

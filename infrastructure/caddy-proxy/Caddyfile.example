@@ -1,0 +1,34 @@
+# Caddyfile configuration template for EduChemSuite reverse proxy
+# Copy this file to `Caddyfile` and update the values below with your own
+
+{
+	# Replace with your domain admin email for Let's Encrypt ACME notifications
+	email you@yourdomain.com
+}
+
+# Optional: Reverse proxy for any other services (remove if not needed)
+# other-service.com {
+#     reverse_proxy <VM_IP_1>:80
+# }
+
+your-domain.com {
+	# Redirect /seq to /seq/ (trailing slash required)
+	handle /seq {
+		redir /seq/ permanent
+	}
+
+	# Protect Seq logs endpoint with HTTP Basic Auth
+	handle_path /seq/* {
+		basic_auth {
+			# Generate a bcrypt hash with: caddy hash-password "your-secure-password"
+			# Then replace the hash below
+			admin <BCRYPT_HASH_OF_SEQ_PASSWORD>
+		}
+		# Replace <VM_IP_2> with your VM's internal IP address
+		reverse_proxy <VM_IP_2>:8082
+	}
+
+	# Main application reverse proxy
+	# Replace <VM_IP_2> with your VM's internal IP address
+	reverse_proxy <VM_IP_2>:80
+}

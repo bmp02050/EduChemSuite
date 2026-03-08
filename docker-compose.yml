@@ -1,5 +1,10 @@
 # Local development only. Production uses infrastructure/deploy/ (blue-green split).
+# For self-hosted deployments, override GHCR_PREFIX: docker compose --env-file .env up -d
+# where .env contains: GHCR_PREFIX=your-registry/your-org/educhemsuite
 services:
+  # Docker Hub reference prefix (default points to official GHCR images)
+  # Override for self-hosted deployments by setting GHCR_PREFIX in .env
+  # Example: GHCR_PREFIX=docker.io/myorg/educhemsuite
   postgres:
     image: postgres:16-alpine
     restart: unless-stopped
@@ -18,7 +23,7 @@ services:
       retries: 5
 
   api:
-    image: ghcr.io/bmp02050/educhemsuite/api:latest
+    image: ${GHCR_PREFIX:-ghcr.io/bmp02050/educhemsuite}/api:latest
     restart: unless-stopped
     ports:
       - "127.0.0.1:8080:8080"
@@ -49,12 +54,12 @@ services:
       SEQ_FIRSTRUN_ADMINPASSWORDHASH: "${SEQ_ADMIN_PASSWORD_HASH:-}"
     ports:
       - "127.0.0.1:5341:5341"
-      - "8081:80"
+      - "127.0.0.1:8081:80"
     volumes:
       - seq-data:/data
 
   ui:
-    image: ghcr.io/bmp02050/educhemsuite/ui:latest
+    image: ${GHCR_PREFIX:-ghcr.io/bmp02050/educhemsuite}/ui:latest
     restart: unless-stopped
     ports:
       - "80:80"

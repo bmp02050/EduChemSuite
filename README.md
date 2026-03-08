@@ -1,5 +1,8 @@
 # EduChemSuite
 
+[![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL_3.0-blue.svg)](LICENSE.md)
+[![Build Status](https://github.com/bmp02050/educhemsuite/actions/workflows/build-deploy.yml/badge.svg)](https://github.com/bmp02050/educhemsuite/actions/workflows/build-deploy.yml)
+
 A chemistry education platform for creating, assigning, and grading exams, including molecule diagram questions with a built-in structure builder.
 
 ## Architecture
@@ -7,8 +10,8 @@ A chemistry education platform for creating, assigning, and grading exams, inclu
 | Component | Stack | Port |
 |-----------|-------|------|
 | **API** | .NET 9.0, EF Core, PostgreSQL | `localhost:5000` (dev) / `8080` (prod) |
-| **UI** | Angular 21, ng-zorro-antd | `localhost:4200` (dev) / `80` (prod) |
-| **ML** | Python Flask (stub) | - |
+| **UI** | Angular 18, ng-zorro-antd | `localhost:4200` (dev) / `80` (prod) |
+| **ML** | Python Flask (non-functional stub) | - |
 
 The API follows a **Controller > Service > Repository** pattern with AutoMapper for entity/model separation. The frontend uses standalone components with lazy-loaded routes.
 
@@ -18,7 +21,7 @@ The API follows a **Controller > Service > Repository** pattern with AutoMapper 
 
 - .NET 9.0 SDK
 - Node.js 18+
-- PostgreSQL (or use Docker: `docker run -d -p 5432:5432 -e POSTGRES_DB=educhemsuite -e POSTGRES_PASSWORD=postgres postgres:16-alpine`)
+- PostgreSQL (or use Docker: `docker run -d -p 5432:5432 -e POSTGRES_DB=educhemsuite -e POSTGRES_PASSWORD=postgres postgres:17-alpine`)
 
 ### API
 
@@ -74,6 +77,16 @@ docker compose up -d
 | `EMAIL_SMTP_USER` | SMTP username |
 | `EMAIL_SMTP_PASSWORD` | SMTP password |
 
+## Self-Hosting
+
+EduChemSuite is designed for self-hosting. Official Docker images are published to GHCR at `ghcr.io/bmp02050/educhemsuite/` and pulled by the deployment workflow.
+
+To self-host:
+1. Fork this repository or use the images directly
+2. If using your own images, update the image references in `docker-compose.yml`
+3. Follow the **Production Deployment** section above
+4. Deploy the Caddy reverse proxy using the template in `infrastructure/caddy-proxy/Caddyfile.example`
+
 ## CI/CD
 
 GitHub Actions (`.github/workflows/build-deploy.yml`): push to `master` builds Docker images, pushes to GHCR, then SSH-deploys via `docker compose pull && up -d`.
@@ -128,3 +141,13 @@ cd EduChemSuite.UI/UI
 npm test         # Unit tests (Karma/Jasmine)
 npm run build    # Production build check
 ```
+
+## Contributing
+
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to report issues, submit pull requests, and our code style conventions.
+
+## License
+
+EduChemSuite is licensed under the **GNU Affero General Public License v3.0** (AGPL-3.0). See [LICENSE.md](LICENSE.md) for full details.
+
+When you modify and deploy EduChemSuite, you must offer users the ability to access the modified source code. For more information, see the [CONTRIBUTING.md](CONTRIBUTING.md#license) guide.
