@@ -88,8 +88,7 @@ public class TokenService(
 
     public async Task<AuthenticateResponse?> AuthenticateAsync(AuthenticateModel model)
     {
-        if ((string.IsNullOrEmpty(model.Email) && String.IsNullOrEmpty(model.Email)) ||
-            string.IsNullOrEmpty(model.Password))
+        if (string.IsNullOrEmpty(model.Email) || string.IsNullOrEmpty(model.Password))
             throw new KeyNotFoundException("Email or password is required");
 
         var user = await userRepository.GetByEmail(model.Email);

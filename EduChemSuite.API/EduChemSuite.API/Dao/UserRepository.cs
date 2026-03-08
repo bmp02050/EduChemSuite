@@ -59,7 +59,8 @@ public class UserRepository(Context context) : IUserRepository
 
     public async Task<User> Update(User userParam, string? password = null)
     {
-        var user = await GetById(userParam.Id);
+        // Fetch user as tracked entity (not AsNoTracking)
+        var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userParam.Id);
         if (user == null)
             throw new Exception("User not found");
 
