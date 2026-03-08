@@ -75,7 +75,12 @@ public class TokenRepository(Context context, IOptions<Jwt> jwtSettings) : IToke
 
     public async Task<bool> ConfirmRegistrationAsync(RegistrationInviteToken token)
     {
-        context.RegistrationInviteTokens.Update(token);
+        // Re-fetch token as tracked entity before updating (previous fetch used AsNoTracking)
+        var trackedToken = await context.RegistrationInviteTokens.FirstOrDefaultAsync(t => t.Id == token.Id);
+        if (trackedToken == null)
+            return false;
+
+        trackedToken.Used = true;
         await context.SaveChangesAsync();
         return true;
     }
@@ -203,8 +208,12 @@ public class TokenRepository(Context context, IOptions<Jwt> jwtSettings) : IToke
 
     public async Task MarkPasswordResetTokenUsedAsync(PasswordResetToken token)
     {
-        token.Used = true;
-        context.PasswordResetTokens.Update(token);
-        await context.SaveChangesAsync();
+        // Re-fetch token as tracked entity before updating (previous fetch used AsNoTracking)
+        var trackedToken = await context.PasswordResetTokens.FirstOrDefaultAsync(t => t.Id == token.Id);
+        if (trackedToken != null)
+        {
+            trackedToken.Used = true;
+            await context.SaveChangesAsync();
+        }
     }
 }

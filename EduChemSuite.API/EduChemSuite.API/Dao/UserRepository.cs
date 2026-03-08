@@ -136,8 +136,10 @@ public class UserRepository(Context context) : IUserRepository
 
     public async Task<User?> AddQuestionToUser(Question question)
     {
-        // Ensure we're working with a clean instance
-        var user = await GetById(question.UserId);
+        // Fetch user as TRACKED entity (required for SaveChangesAsync to detect collection changes)
+        var user = await context.Users
+            .Include(u => u.Questions)
+            .FirstOrDefaultAsync(u => u.Id == question.UserId);
         if (user == null)
             return null;
 
@@ -146,12 +148,12 @@ public class UserRepository(Context context) : IUserRepository
 
         // Check if question already exists
         var existingQuestion = user.Questions.FirstOrDefault(q => q.Id == question.Id);
-    
+
         if (existingQuestion == null)
         {
             // Check if the question is already tracked by the context
             var trackedQuestion = await context.Questions.FindAsync(question.Id);
-        
+
             if (trackedQuestion != null)
             {
                 // Use the tracked instance
@@ -187,10 +189,10 @@ public class UserRepository(Context context) : IUserRepository
                 {
                     // Reload the user and retry
                     await entry.ReloadAsync();
-                
+
                     // Option 1: Retry the operation
                     // return await AddQuestionToUser(question);
-                
+
                     // Option 2: Log and return null
                     // Log the concurrency issue
                     return null;
@@ -213,7 +215,8 @@ public class UserRepository(Context context) : IUserRepository
 
     public async Task<User> UpdateAccountType(Guid userId, AccountType newType)
     {
-        var user = await GetById(userId);
+        // Fetch user as TRACKED entity (required for SaveChangesAsync to persist changes)
+        var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userId);
         if (user == null)
             throw new KeyNotFoundException("User not found");
 
