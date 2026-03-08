@@ -1,4 +1,5 @@
 using AutoMapper;
+using EduChemSuite.API.Helpers;
 using EduChemSuite.API.Models;
 using EduChemSuite.API.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -13,13 +14,18 @@ public class AuthController(
     IUserService userService,
     IEmailService emailService,
     IConfiguration configuration,
-    ILogger<UserController> logger) : Controller
+    ILogger<UserController> logger,
+    AuthRateLimiter rateLimiter) : Controller
 {
     private readonly string _frontendUrl = configuration["FrontendUrl"] ?? "http://localhost:4300";
     [AllowAnonymous]
     [HttpPost("authenticate")]
     public async Task<IActionResult> Authenticate([FromBody] AuthenticateModel model)
     {
+        var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        if (rateLimiter.IsRateLimited(ip))
+            return StatusCode(429, new { message = "Too many requests. Please try again later." });
+
         try
         {
             var response = await tokenService.AuthenticateAsync(model);
@@ -37,6 +43,10 @@ public class AuthController(
     [HttpPost("refresh-token")]
     public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
     {
+        var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        if (rateLimiter.IsRateLimited(ip))
+            return StatusCode(429, new { message = "Too many requests. Please try again later." });
+
         try
         {
             var response = await tokenService.RefreshTokenAsync(request.UserId, request.RefreshToken);
@@ -55,6 +65,10 @@ public class AuthController(
     [HttpPost("forgot-password")]
     public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordModel model)
     {
+        var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        if (rateLimiter.IsRateLimited(ip))
+            return StatusCode(429, new { message = "Too many requests. Please try again later." });
+
         try
         {
             var user = await userService.GetByEmail(model.Email);
@@ -81,6 +95,10 @@ public class AuthController(
     [HttpPost("resend-verification")]
     public async Task<IActionResult> ResendVerification([FromBody] ForgotPasswordModel model)
     {
+        var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        if (rateLimiter.IsRateLimited(ip))
+            return StatusCode(429, new { message = "Too many requests. Please try again later." });
+
         try
         {
             var user = await userService.GetByEmail(model.Email);
@@ -107,6 +125,10 @@ public class AuthController(
     [HttpPost("reset-password")]
     public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordModel model)
     {
+        var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        if (rateLimiter.IsRateLimited(ip))
+            return StatusCode(429, new { message = "Too many requests. Please try again later." });
+
         try
         {
             var result = await tokenService.ResetPasswordAsync(model.UserId, model.Token, model.NewPassword);

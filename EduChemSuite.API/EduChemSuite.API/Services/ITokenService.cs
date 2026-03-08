@@ -76,14 +76,12 @@ public class TokenService(
             await tokenRepository.GetRegistrationToken(userId, token);
         if (existingToken is null)
             throw new KeyNotFoundException("Token not found");
-        
-        var now = DateTime.UtcNow;
-        if (now <= existingToken?.Expiration)
-        {
-            existingToken.Used = true;
-        }
 
-        return existingToken != null && await tokenRepository.ConfirmRegistrationAsync(existingToken);
+        if (DateTime.UtcNow > existingToken.Expiration)
+            throw new Exception("Registration token has expired.");
+
+        existingToken.Used = true;
+        return await tokenRepository.ConfirmRegistrationAsync(existingToken);
     }
 
     public async Task<AuthenticateResponse?> AuthenticateAsync(AuthenticateModel model)

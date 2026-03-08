@@ -131,4 +131,71 @@ public class AuthControllerTests : IClassFixture<EduChemTestFactory>
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
+
+    [Fact]
+    public async Task Authenticate_ExceedRateLimit_Returns429()
+    {
+        var db = _factory.GetDbContext();
+        TestDataSeeder.CreateUser(db, "ratelimit@test.com", "Password123!", AccountType.Admin);
+
+        // Make 10 valid requests (within limit)
+        for (int i = 0; i < 10; i++)
+        {
+            var response = await _client.PostAsync("/api/auth/authenticate",
+                JsonBody(new { Email = "ratelimit@test.com", Password = "Password123!" }));
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+        }
+
+        // 11th request should be rate limited
+        var rateLimitedResponse = await _client.PostAsync("/api/auth/authenticate",
+            JsonBody(new { Email = "ratelimit@test.com", Password = "Password123!" }));
+
+        rateLimitedResponse.StatusCode.Should().Be(HttpStatusCode.TooManyRequests);
+    }
+
+    [Fact]
+    public async Task ForgotPassword_ExceedRateLimit_Returns429()
+    {
+        var db = _factory.GetDbContext();
+        TestDataSeeder.CreateUser(db, "forgot-ratelimit@test.com", "Password123!", AccountType.Admin);
+
+        // Make 10 valid requests (within limit)
+        for (int i = 0; i < 10; i++)
+        {
+            var response = await _client.PostAsync("/api/auth/forgot-password",
+                JsonBody(new { Email = "forgot-ratelimit@test.com" }));
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+        }
+
+        // 11th request should be rate limited
+        var rateLimitedResponse = await _client.PostAsync("/api/auth/forgot-password",
+            JsonBody(new { Email = "forgot-ratelimit@test.com" }));
+
+        rateLimitedResponse.StatusCode.Should().Be(HttpStatusCode.TooManyRequests);
+    }
+
+    [Fact]
+    public async Task ResetPassword_WithExpiredToken_ReturnsBadRequest()
+    {
+        var db = _factory.GetDbContext();
+        var user = TestDataSeeder.CreateUser(db, "reset-expired@test.com", "Password123!", AccountType.Admin);
+
+        // Create an expired password reset token
+        var expiredToken = new PasswordResetToken
+        {
+            UserId = user.Id,
+            Token = Convert.ToBase64String(new byte[32]),
+            Expiration = DateTime.UtcNow.AddMinutes(-1), // Expired 1 minute ago
+            Used = false
+        };
+        db.PasswordResetTokens.Add(expiredToken);
+        db.SaveChanges();
+
+        var response = await _client.PostAsync("/api/auth/reset-password",
+            JsonBody(new { UserId = user.Id, Token = expiredToken.Token, NewPassword = "NewPass123!" }));
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var content = await response.Content.ReadAsStringAsync();
+        content.Should().Contain("expired");
+    }
 }

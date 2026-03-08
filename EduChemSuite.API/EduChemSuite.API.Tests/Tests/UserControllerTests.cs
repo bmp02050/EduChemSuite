@@ -145,4 +145,49 @@ public class UserControllerTests : IClassFixture<EduChemTestFactory>
 
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
+
+    [Fact]
+    public async Task GenerateToken_ExceedRateLimit_Returns429()
+    {
+        var db = _factory.GetDbContext();
+        var user = TestDataSeeder.CreateUser(db, $"user-token-ratelimit-{Guid.NewGuid()}@test.com", "Pass123!", AccountType.Admin, verifiedEmail: false);
+
+        var client = _factory.CreateClient();
+
+        // Make 10 valid requests (within limit)
+        for (int i = 0; i < 10; i++)
+        {
+            var response = await client.GetAsync($"/api/user/{user.Id}/token");
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+        }
+
+        // 11th request should be rate limited
+        var rateLimitedResponse = await client.GetAsync($"/api/user/{user.Id}/token");
+        rateLimitedResponse.StatusCode.Should().Be(HttpStatusCode.TooManyRequests);
+    }
+
+    [Fact]
+    public async Task ConfirmEmail_WithExpiredToken_ReturnsBadRequest()
+    {
+        var db = _factory.GetDbContext();
+        var user = TestDataSeeder.CreateUser(db, $"user-confirm-expired-{Guid.NewGuid()}@test.com", "Pass123!", AccountType.Admin, verifiedEmail: false);
+
+        // Create an expired registration token
+        var expiredToken = new RegistrationInviteToken
+        {
+            UserId = user.Id,
+            Token = Convert.ToBase64String(new byte[32]),
+            Expiration = DateTime.UtcNow.AddMinutes(-1), // Expired 1 minute ago
+            Used = false
+        };
+        db.RegistrationInviteTokens.Add(expiredToken);
+        db.SaveChanges();
+
+        var client = _factory.CreateClient();
+        var response = await client.GetAsync($"/api/user/confirm-email?userId={user.Id}&token={Uri.EscapeDataString(expiredToken.Token)}");
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var content = await response.Content.ReadAsStringAsync();
+        content.Should().Contain("expired");
+    }
 }

@@ -21,7 +21,8 @@ public class UserController(
     IEmailService emailService,
     IInviteService inviteService,
     IConfiguration configuration,
-    ILogger<UserController> logger)
+    ILogger<UserController> logger,
+    AuthRateLimiter rateLimiter)
     : ControllerBase
 {
     private readonly IMapper _mapper = mapper;
@@ -104,6 +105,10 @@ public class UserController(
     [HttpGet("{id}/token")]
     public async Task<IActionResult> GenerateNewRegistrationToken(Guid id)
     {
+        var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        if (rateLimiter.IsRateLimited(ip))
+            return StatusCode(429, new { message = "Too many requests. Please try again later." });
+
         try
         {
             var token = await tokenService.GenerateRegistrationInvitationTokenAsync(id);

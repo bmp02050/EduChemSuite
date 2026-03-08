@@ -72,7 +72,8 @@ builder.Services
     .AddTransient<IMessageService, MessageService>()
     .AddTransient<IExamGradingService, ExamGradingService>()
     .AddTransient<IUserScopingService, UserScopingService>()
-    .AddSingleton<ContactRateLimiter>();
+    .AddSingleton<ContactRateLimiter>()
+    .AddSingleton<AuthRateLimiter>();
 builder.Services.AddAuthorizationBuilder();
 builder.Services.AddDbContext<Context>(options =>
     {
